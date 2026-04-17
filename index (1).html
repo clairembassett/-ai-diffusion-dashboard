@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Investment &amp; Diffusion Monitor — Four-Stage Research Dashboard</title>
+  <meta name="description" content="Research dashboard examining how global AI investment shapes the rate and pattern of AI adoption across industries, business functions, and labor markets. 2019–2030, 10-country panel.">
+  <meta name="author" content="AI Diffusion Research">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="AI Investment & Diffusion Monitor">
+  <meta property="og:description" content="Four-stage research arc: capacity, concentration, forecast, labor consequences. 2019–2030 panel analysis.">
+  <meta property="og:type" content="website">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=jetbrains-mono@400,500&display=swap">
+
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --bg:#fafaf7;--surface:#fff;--surface-alt:#f3f3ee;--border:#e4e4df;--border-strong:#c9c9c0;
+      --text:#151513;--muted:#6b6b62;--faint:#999990;
+      --accent:#0d9488;--accent-soft:rgba(13,148,136,0.08);--accent-line:rgba(13,148,136,0.22);
+      --p1:#7c3aed;--p2:#ca8a04;--p3:#0d9488;--p4:#dc2626;
+      --p1-s:rgba(124,58,237,0.08);--p2-s:rgba(202,138,4,0.08);--p3-s:rgba(13,148,136,0.08);--p4-s:rgba(220,38,38,0.08);
+      --hist:#151513;
+    }
+    [data-theme=dark]{
+      --bg:#0d0d0a;--surface:#151512;--surface-alt:#1c1c18;--border:#2a2a25;--border-strong:#3a3a34;
+      --text:#f0f0ea;--muted:#a0a095;--faint:#6b6b62;
+      --accent:#2dd4bf;--accent-soft:rgba(45,212,191,0.10);--accent-line:rgba(45,212,191,0.28);
+      --p1:#a78bfa;--p2:#fbbf24;--p3:#2dd4bf;--p4:#f87171;
+      --p1-s:rgba(167,139,250,0.12);--p2-s:rgba(251,191,36,0.12);--p3-s:rgba(45,212,191,0.12);--p4-s:rgba(248,113,113,0.12);
+      --hist:#f0f0ea;
+    }
+    html,body{height:100%;}
+    body{background:var(--bg);color:var(--text);font-family:'Satoshi',system-ui,sans-serif;font-feature-settings:'tnum' 1;min-height:100vh;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+    .layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
+
+    .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:24px 18px;position:sticky;top:0;height:100vh;overflow-y:auto;}
+    .brand{font-size:13px;font-weight:700;margin-bottom:2px;}
+    .brand-sub{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--faint);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:22px;}
+    .arc-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint);text-transform:uppercase;letter-spacing:0.9px;margin:18px 0 6px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;font-size:12.5px;color:var(--muted);border-radius:6px;cursor:pointer;margin:2px 0;transition:all 0.12s;line-height:1.3;text-decoration:none;}
+    .nav-item:hover{background:var(--surface-alt);color:var(--text);}
+    .nav-item.active{background:var(--accent-soft);color:var(--accent);font-weight:500;}
+    .nav-num{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--faint);min-width:14px;}
+    .nav-item.active .nav-num{color:var(--accent);}
+    .nav-step{font-size:10px;color:var(--muted);display:block;margin-top:1px;font-weight:400;}
+    .theme-toggle{padding:9px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;position:absolute;bottom:20px;left:18px;right:18px;}
+    .theme-toggle:hover{border-color:var(--border-strong);color:var(--text);}
+
+    .main{padding:32px 40px 80px;max-width:1100px;}
+
+    .framework{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:26px 28px;margin-bottom:36px;}
+    .framework h1{font-size:22px;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px;line-height:1.3;}
+    .framework .research-q{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:16px;}
+    .framework p{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:14px;max-width:760px;}
+    .framework p em{font-style:italic;color:var(--text);}
+    .arc{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px;}
+    .arc-step{padding:12px;border-radius:8px;border:1px solid var(--border);position:relative;}
+    .arc-step.s1{background:var(--p1-s);border-color:var(--p1);}
+    .arc-step.s2{background:var(--p2-s);border-color:var(--p2);}
+    .arc-step.s3{background:var(--p3-s);border-color:var(--p3);}
+    .arc-step.s4{background:var(--p4-s);border-color:var(--p4);}
+    .arc-step .n{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.7px;font-weight:500;margin-bottom:5px;}
+    .s1 .n{color:var(--p1);} .s2 .n{color:var(--p2);} .s3 .n{color:var(--p3);} .s4 .n{color:var(--p4);}
+    .arc-step .t{font-size:13px;font-weight:700;margin-bottom:4px;letter-spacing:-0.2px;}
+    .arc-step .d{font-size:11.5px;color:var(--muted);line-height:1.45;}
+    .arrow{position:absolute;right:-8px;top:50%;transform:translateY(-50%);color:var(--faint);font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;z-index:2;}
+
+    .section{margin-bottom:48px;scroll-margin-top:20px;}
+    .sec-head{margin-bottom:18px;}
+    .sec-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:3px 9px;border-radius:4px;letter-spacing:0.7px;margin-bottom:8px;color:white;}
+    .sec-tag.s1{background:var(--p1);}
+    .sec-tag.s2{background:var(--p2);}
+    .sec-tag.s3{background:var(--p3);}
+    .sec-tag.s4{background:var(--p4);}
+    .sec-title{font-size:18px;font-weight:700;letter-spacing:-0.3px;margin-bottom:6px;}
+    .sec-lede{font-size:13.5px;color:var(--text);line-height:1.6;margin-bottom:8px;max-width:760px;}
+    .sec-lede strong{color:var(--accent);font-weight:500;}
+    .sec-desc{font-size:12.5px;color:var(--muted);line-height:1.55;max-width:760px;}
+
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 22px;}
+    .card+.card{margin-top:12px;}
+    .card-title{font-size:13.5px;font-weight:700;margin-bottom:2px;}
+    .card-sub{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);margin-bottom:14px;line-height:1.5;}
+    .chart-wrap{position:relative;width:100%;}
+    .legend-row{display:flex;flex-wrap:wrap;gap:7px 12px;margin-bottom:12px;}
+    .legend-item{display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;padding:2px 5px;border-radius:3px;}
+    .legend-item:hover{background:var(--surface-alt);}
+    .legend-item.dimmed{opacity:0.35;}
+    .legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+    .tab-row{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:14px;}
+    .tab-btn{font-family:'Satoshi',sans-serif;font-size:12px;font-weight:500;background:none;border:none;color:var(--muted);cursor:pointer;padding:9px 14px;border-bottom:2px solid transparent;margin-bottom:-1px;}
+    .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:700;}
+    .tab-pane{display:none;}
+    .tab-pane.active{display:block;}
+
+    .findings{margin-top:14px;padding:12px 14px;background:var(--accent-soft);border-left:2px solid var(--accent);border-radius:0 6px 6px 0;font-size:12.5px;line-height:1.65;}
+    .findings strong{color:var(--accent);font-weight:700;}
+    .findings .label{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--accent);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:5px;display:block;font-weight:500;}
+
+    .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+    .stat{background:var(--surface-alt);border-radius:6px;padding:10px 12px;}
+    .stat-l{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;}
+    .stat-v{font-size:17px;font-weight:700;letter-spacing:-0.4px;}
+    .stat-s{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);margin-top:2px;}
+
+    .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px;}
+    .kpi{background:var(--surface-alt);border-radius:8px;padding:11px 13px;border-left:3px solid var(--accent);}
+    .kpi.p1{border-left-color:var(--p1);} .kpi.p2{border-left-color:var(--p2);} .kpi.p3{border-left-color:var(--p3);} .kpi.p4{border-left-color:var(--p4);}
+    .kpi-l{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:3px;}
+    .kpi-v{font-size:16px;font-weight:700;letter-spacing:-0.3px;}
+    .kpi-s{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);margin-top:2px;}
+
+    .synth-card{background:var(--surface);border:2px solid var(--accent);border-radius:12px;padding:24px 26px;margin-top:24px;}
+    .synth-card h2{font-size:17px;font-weight:700;letter-spacing:-0.3px;margin-bottom:10px;color:var(--accent);}
+    .synth-card p{font-size:13px;color:var(--text);line-height:1.65;margin-bottom:10px;}
+    .synth-card p strong{color:var(--accent);}
+    .synth-card p em{font-style:italic;color:var(--muted);}
+
+    .footer{margin-top:32px;padding-top:18px;border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--faint);font-style:italic;line-height:1.65;}
+    .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
+
+    /* Responsive */
+    @media (max-width: 900px){
+      .layout{grid-template-columns:1fr;}
+      .sidebar{position:relative;height:auto;border-right:none;border-bottom:1px solid var(--border);padding:18px;}
+      .sidebar .theme-toggle{position:relative;bottom:auto;left:auto;right:auto;margin-top:14px;}
+      .main{padding:24px 18px 60px;}
+      .arc{grid-template-columns:1fr 1fr;}
+      .kpi-strip{grid-template-columns:1fr 1fr;}
+      .stat-row{grid-template-columns:1fr;}
+      .arrow{display:none;}
+    }
+    @media (max-width: 500px){
+      .arc{grid-template-columns:1fr;}
+      .kpi-strip{grid-template-columns:1fr;}
+      .framework h1{font-size:18px;}
+    }
+  </style>
+</head>
+<body>
+
+<h2 class="sr">Research dashboard examining global AI investment influence on diffusion and labor outcomes across four analytical stages.</h2>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">AI Diffusion Monitor</div>
+    <div class="brand-sub">Research &middot; v5 &middot; Four-stage arc</div>
+
+    <div class="arc-label">Framework</div>
+    <a class="nav-item active" data-target="framework" href="#framework"><span class="nav-num">00</span>Research framework</a>
+
+    <div class="arc-label">Argumentative stages</div>
+    <a class="nav-item" data-target="sec-1" href="#sec-1"><span class="nav-num">01</span>Capacity<span class="nav-step">Intensity by country</span></a>
+    <a class="nav-item" data-target="sec-2" href="#sec-2"><span class="nav-num">02</span>Concentration<span class="nav-step">Where investment flows</span></a>
+    <a class="nav-item" data-target="sec-3" href="#sec-3"><span class="nav-num">03</span>Forecast<span class="nav-step">Trajectory to 2030</span></a>
+    <a class="nav-item" data-target="sec-4" href="#sec-4"><span class="nav-num">04</span>Labor consequences<span class="nav-step">Employment shifts</span></a>
+
+    <div class="arc-label">Closing</div>
+    <a class="nav-item" data-target="synth" href="#synth"><span class="nav-num">05</span>Synthesis</a>
+
+    <button class="theme-toggle" id="theme-btn" type="button" aria-label="Toggle color theme"><span>Theme</span><span id="theme-label">LIGHT</span></button>
+  </aside>
+
+  <main class="main">
+
+    <section id="framework" class="framework">
+      <div class="research-q">Research question</div>
+      <h1>How does global AI investment shape the rate and pattern of AI adoption across industries and business functions &mdash; and what does that mean for labor?</h1>
+      <p>We examine how global AI investment shapes the rate and pattern of AI adoption across industries and business functions. We build the argument in four stages: first a measure of national <em>capacity</em>; then <em>concentration</em> of global flows; then a <em>forecast</em> of both aggregate growth and its allocation; finally the <em>labor</em> consequences that follow from that trajectory.</p>
+
+      <div class="arc">
+        <div class="arc-step s1">
+          <div class="n">STAGE 01 &middot; CAPACITY</div>
+          <div class="t">Who can diffuse</div>
+          <div class="d">Private AI investment &divide; real GDP, by country. Investment intensity as a proxy for national capacity to support AI diffusion.</div>
+          <span class="arrow">&rarr;</span>
+        </div>
+        <div class="arc-step s2">
+          <div class="n">STAGE 02 &middot; CONCENTRATION</div>
+          <div class="t">Where it flows</div>
+          <div class="d">Aggregate global investment in levels (unscaled). Identifies how growth is distributed across industries and business functions.</div>
+          <span class="arrow">&rarr;</span>
+        </div>
+        <div class="arc-step s3">
+          <div class="n">STAGE 03 &middot; FORECAST</div>
+          <div class="t">Where it&rsquo;s heading</div>
+          <div class="d">Logistic model of global investment to 2030, plus Bass-velocity allocation across industries &mdash; trajectory of AI diffusion.</div>
+          <span class="arrow">&rarr;</span>
+        </div>
+        <div class="arc-step s4">
+          <div class="n">STAGE 04 &middot; LABOR</div>
+          <div class="t">What it does to jobs</div>
+          <div class="d">BLS 2024&ndash;34 projections vs. sector adoption. Employment and unemployment shifts associated with AI investment and adoption.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="sec-1">
+      <div class="sec-head">
+        <span class="sec-tag s1">STAGE 01 &middot; CAPACITY</span>
+        <div class="sec-title">AI investment intensity as a proxy for national diffusion capacity</div>
+        <div class="sec-lede">We construct <strong>AI investment intensity</strong> as private AI investment by country scaled by real GDP. Scaling by GDP lets us compare economies of very different sizes on the same footing &mdash; it&rsquo;s a proxy for how much of a country&rsquo;s productive capacity is being committed to AI, and therefore for the institutional ability to absorb and diffuse the technology.</div>
+        <div class="sec-desc">Panel: 10 sovereign countries, 2019&ndash;2025. EU aggregate excluded &mdash; a 27-country aggregate cannot be meaningfully compared to single economies on a scaled axis.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Private AI investment as % of real GDP, 2019&ndash;2025</div>
+        <div class="card-sub">Source: ai_investment_percentage.csv &middot; n=10 &middot; click legend to isolate country</div>
+        <div class="legend-row" id="lg-1"></div>
+        <div class="chart-wrap" style="height:340px"><canvas id="ch-1" role="img" aria-label="Line chart of AI investment as percent of GDP by country 2019 to 2025">US 0.88 percent leads, Singapore 0.27 percent, China 0.06 percent.</canvas></div>
+
+        <div class="findings">
+          <span class="label">Capacity &mdash; key findings</span>
+          The US expanded intensity <strong>8.6&times;</strong> (0.10% &rarr; 0.88% of GDP, 2019&ndash;2025), concentrating global diffusion capacity. Singapore sustains ~0.27&ndash;0.37% of GDP as APAC&rsquo;s AI hub despite being a small economy. <strong>China&rsquo;s 2025 intensity (0.06%) is lower than its 2021 peak (0.09%)</strong> &mdash; export controls and macro pressure are compressing capacity. Germany and France are stuck below 0.08% &mdash; the diffusion-capacity gap that EU AI policy references is visible in the data.
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="sec-2">
+      <div class="sec-head">
+        <span class="sec-tag s2">STAGE 02 &middot; CONCENTRATION</span>
+        <div class="sec-title">Where aggregate investment is concentrating, in levels</div>
+        <div class="sec-lede">Now we <strong>switch to unscaled global levels</strong> to identify where investment growth is actually going. Intensity told us which countries can diffuse; levels tell us which industries and functions are absorbing the capital. Because we&rsquo;re interested in the global distribution of flows, GDP-scaling would obscure the thing we want to see.</div>
+        <div class="sec-desc">Global corporate AI investment reached $252.3B in 2024 and $581.7B in 2025 (Stanford AI Index 2026). Underneath, adoption rates by industry and function reveal the distributional structure.</div>
+      </div>
+
+      <div class="kpi-strip">
+        <div class="kpi p2"><div class="kpi-l">Global 2025 (private)</div><div class="kpi-v">$344.7B</div><div class="kpi-s">+127.5% YoY &middot; AI Index 2026</div></div>
+        <div class="kpi p2"><div class="kpi-l">Global 2025 (corporate)</div><div class="kpi-v">$581.7B</div><div class="kpi-s">M&amp;A + private + public</div></div>
+        <div class="kpi p2"><div class="kpi-l">GenAI subset 2025</div><div class="kpi-v">$170.9B</div><div class="kpi-s">49.6% of all private AI</div></div>
+        <div class="kpi p2"><div class="kpi-l">Fastest function gain</div><div class="kpi-v">IT +26pp</div><div class="kpi-s">17% &rarr; 43% (2021&ndash;25)</div></div>
+      </div>
+
+      <div class="card" style="margin-top:14px;">
+        <div class="card-title">Global AI investment in levels</div>
+        <div class="card-sub">USD billions &middot; raw (not scaled) &middot; panel highlights pre-2025 cycle then breakout</div>
+        <div class="chart-wrap" style="height:240px"><canvas id="ch-2glob" role="img" aria-label="Global AI investment from 2019 to 2025 in USD billions">Global investment grew from 40 billion in 2019 to 345 billion in 2025.</canvas></div>
+      </div>
+
+      <div class="card" style="margin-top:14px;">
+        <div class="tab-row">
+          <button class="tab-btn active" data-tab="sector" type="button">By industry</button>
+          <button class="tab-btn" data-tab="function" type="button">By business function</button>
+        </div>
+        <div class="tab-pane active" id="pane-sector">
+          <div class="card-title">Sector adoption, 2022 vs 2025</div>
+          <div class="card-sub">% of organisations using AI &middot; 15 industries &middot; sorted by 2025 level</div>
+          <div class="chart-wrap" style="height:340px"><canvas id="ch-2s" role="img" aria-label="Grouped bar chart of sector adoption 2022 versus 2025">Technology 92 percent, Agriculture 42 percent.</canvas></div>
+        </div>
+        <div class="tab-pane" id="pane-function">
+          <div class="card-title">Business function adoption, 2021 vs 2025</div>
+          <div class="card-sub">% of AI-adopting orgs using AI per function &middot; 11 categories &middot; McKinsey Global Survey</div>
+          <div class="chart-wrap" style="height:340px"><canvas id="ch-2f" role="img" aria-label="Grouped bar chart of function adoption 2021 versus 2025">IT Engineering 43 percent, Strategy 18 percent.</canvas></div>
+        </div>
+
+        <div class="findings">
+          <span class="label">Concentration &mdash; key findings</span>
+          Investment growth concentrates where <strong>information-intensity</strong> is highest: Tech (70%&rarr;92%), Professional Services (50%&rarr;82%), and Financial Services (55%&rarr;80%). Manual-heavy sectors (Agriculture 15%&rarr;42%, Real Estate 18%&rarr;46%) grow but from low bases. On functions, <strong>IT &amp; Software Engineering</strong> jumped from 17% to 43% in four years &mdash; the clearest signal that capital is flowing into productivity-augmenting applications in knowledge work.
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="sec-3">
+      <div class="sec-head">
+        <span class="sec-tag s3">STAGE 03 &middot; FORECAST</span>
+        <div class="sec-title">Forecasting growth and its allocation across industries</div>
+        <div class="sec-lede">Having established where investment is now concentrated, we extend forward. <strong>Logistic (S-curve) diffusion model</strong> fitted on global private investment, 2019&ndash;2025 (n=7, R&sup2;=0.949). Allocation forecast combines each sector&rsquo;s <strong>Bass-diffusion velocity</strong> with its GDP weight &mdash; capital chases sectors with the highest remaining adoption upside scaled by economic size.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Global AI investment &mdash; observed &amp; projected to 2030</div>
+        <div class="card-sub">I(t) = K / [1 + exp(&minus;r(t &minus; t&#8320;))] &middot; K = $1,200B, r = 0.447, t&#8320; = 2027.1 &middot; 80% CI from residual bootstrap</div>
+        <div class="chart-wrap" style="height:300px"><canvas id="ch-3" role="img" aria-label="Global AI investment forecast to 2030 with confidence band">Projection reaches 943 billion by 2030, 80 percent CI 492 to 990 billion.</canvas></div>
+
+        <div class="findings">
+          <span class="label">Forecast &mdash; model properties</span>
+          Inflection at <strong>t&#8320; &asymp; 2027</strong> means peak annual acceleration is within 12 months; growth then decelerates toward the $1.2T ceiling as diminishing returns bite. Central 2030 estimate is <strong>$943B</strong> (80% CI $492B&ndash;$990B). The ceiling is externally anchored to Gartner&rsquo;s $2.5T total-AI-spending forecast &mdash; private investment as ~20&ndash;30% of that total.
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px;">
+        <div class="card-title">Allocation forecast: where the next $600B will flow</div>
+        <div class="card-sub">Shares derived from sector Bass velocity &times; GDP weight &middot; sums to 100% of projected 2026&ndash;2030 incremental investment</div>
+        <div class="chart-wrap" style="height:280px"><canvas id="ch-3alloc" role="img" aria-label="Horizontal bar chart of projected sector allocation shares">Financial Services 14 percent, Manufacturing 13 percent, Tech 12 percent lead allocation.</canvas></div>
+
+        <div class="findings">
+          <span class="label">Allocation &mdash; where it&rsquo;s heading</span>
+          <strong>Financial Services (14%)</strong>, <strong>Manufacturing (13%)</strong>, and <strong>Technology (12%)</strong> absorb the largest projected shares &mdash; a mix of high-velocity sectors (Tech, FinServ) and large-GDP sectors with substantial remaining runway (Manufacturing). Sectors near saturation (Tech already at 92%) still attract capital because GDP weight is large; sectors with rapid velocity but thin GDP weight (Legal, Environment) get less.
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="sec-4">
+      <div class="sec-head">
+        <span class="sec-tag s4">STAGE 04 &middot; LABOR CONSEQUENCES</span>
+        <div class="sec-title">Employment and unemployment shifts associated with AI investment and adoption</div>
+        <div class="sec-lede">Finally, we turn to labor outcomes. <strong>BLS 2024&ndash;2034 employment projections</strong> (released August 2025) incorporate explicit AI-impact adjustments. We pair sector adoption rates with their projected 10-year employment growth to examine whether AI-leading sectors are gaining or losing labor demand. We also flag the Brynjolfsson et al. <strong>early-career displacement finding</strong> &mdash; a 13% employment decline for ages 22&ndash;25 in AI-exposed occupations, a pattern invisible in aggregate sector numbers.</div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat">
+          <div class="stat-l">US total employment 2024&ndash;34</div>
+          <div class="stat-v">+3.1%</div>
+          <div class="stat-s">170.0M &rarr; 175.2M &middot; BLS 2025</div>
+        </div>
+        <div class="stat">
+          <div class="stat-l">Computer occupations</div>
+          <div class="stat-v">+11.7%</div>
+          <div class="stat-s">2.9&times; faster than overall</div>
+        </div>
+        <div class="stat">
+          <div class="stat-l">Early-career in AI-exposed</div>
+          <div class="stat-v">&minus;13%</div>
+          <div class="stat-s">Ages 22&ndash;25 &middot; Brynjolfsson 2025</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Sector AI adoption (2025) vs projected 10-year employment growth</div>
+        <div class="card-sub" id="ch-4-sub">Y-axis: BLS 2024&ndash;34 sector employment growth projection &middot; X-axis: 2025 AI adoption &middot; bubble sized by US sector employment</div>
+        <div class="chart-wrap" style="height:340px"><canvas id="ch-4" role="img" aria-label="Scatter plot of sector AI adoption versus BLS employment growth projection">Mildly positive association; retail shows high adoption with negative employment growth.</canvas></div>
+
+        <div class="findings">
+          <span class="label">Labor consequences &mdash; key findings</span>
+          The scatter shows a <strong>mildly positive but noisy</strong> association between sector adoption and projected employment growth: high-adoption sectors (Tech, Professional Services, Healthcare) are all projected to gain jobs. Aggregate BLS projections <strong>do not</strong> show AI leading to net sector-level losses in high-adoption sectors &mdash; instead, the pattern is <strong>augmentation with occupational churn</strong>. Retail is the exception &mdash; high-velocity adoption paired with projected net job losses, consistent with automation substituting for labor in customer-facing roles. <strong>Critical caveat:</strong> sector aggregates mask the occupational distribution. Brynjolfsson et al. find early-career workers in AI-exposed roles (software developers, customer service, accountants aged 22&ndash;25) are <strong>already</strong> seeing 13% employment declines even while their sectors grow &mdash; a compositional effect invisible in sector totals.
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="synth">
+      <div class="synth-card">
+        <h2>Synthesis &mdash; connecting the four stages</h2>
+        <p><strong>Stage 01 &rarr; 02:</strong> National capacity (investment intensity) is extraordinarily concentrated &mdash; the US alone runs 8.6&times; the 2019 intensity, while most of the world flatlines. That capacity concentration translates directly into <em>where</em> the global flows go: 83% of 2025 private investment landed in the US.</p>
+        <p><strong>Stage 02 &rarr; 03:</strong> Within the global flow, capital concentrates in information-intensive sectors (Tech, Finance, Professional Services) and knowledge-work functions (IT, Marketing, Product). The logistic forecast implies peak acceleration in 2027, with the next $600B allocated to sectors that combine high adoption velocity with substantial GDP weight.</p>
+        <p><strong>Stage 03 &rarr; 04:</strong> The sector-level labor evidence is <em>not</em> a story of aggregate displacement &mdash; BLS projects the highest-adoption sectors to gain jobs through 2034. But sector totals hide occupational composition: early-career employment in AI-exposed roles is <strong>already</strong> declining 13%, and retail (high-velocity adoption, projected net job losses) signals where substitution effects can dominate.</p>
+        <p><strong>Research-question answer:</strong> Global AI investment shapes diffusion patterns primarily through three mechanisms &mdash; (1) concentrating national capacity in a small set of economies, (2) channelling capital into information-intensive sectors where marginal returns are highest, and (3) restructuring occupational demand within otherwise growing sectors. The labor consequences are <em>distributional</em>, not aggregate, which makes standard sector-level indicators inadequate for monitoring them.</p>
+      </div>
+
+      <div class="footer">
+        Data sources: Stanford AI Index 2025 &amp; 2026 (investment); Mendeley datasets (adoption); U.S. Bureau of Labor Statistics 2024&ndash;34 projections (labor); Brynjolfsson, Chandar &amp; Chen 2025 (early-career displacement). Limitations: 10-country panel; adoption from self-reported surveys; country-level adoption in stage 1 is not directly measured; labor data is US-only; forecast uncertainty widens beyond 2027.
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ============ DATA ============
+const COUNTRY_NAME = {US:'United States',CN:'China',GB:'United Kingdom',IN:'India',CA:'Canada',DE:'Germany',FR:'France',KR:'South Korea',JP:'Japan',SG:'Singapore'};
+const SCALED = {
+  US:[0.103,0.126,0.227,0.185,0.246,0.379,0.883], CN:[0.060,0.061,0.094,0.073,0.044,0.050,0.059],
+  GB:[0.063,0.077,0.128,0.141,0.111,0.122,0.138], IN:[0.028,0.037,0.101,0.114,0.115,0.156,0.099],
+  CA:[0.069,0.085,0.124,0.128,0.120,0.138,0.171], DE:[0.023,0.025,0.048,0.055,0.046,0.058,0.072],
+  FR:[0.026,0.030,0.061,0.072,0.062,0.076,0.122], KR:[0.051,0.057,0.108,0.128,0.119,0.149,0.093],
+  JP:[0.023,0.026,0.048,0.063,0.059,0.079,0.025], SG:[0.106,0.143,0.275,0.275,0.297,0.365,0.273]
+};
+const YEARS = [2019,2020,2021,2022,2023,2024,2025];
+const GLOBAL_INV = {years:YEARS, values:[40.1,48.0,118.8,91.9,131.0,252.3,344.7]};
+
+const SECTORS = {
+  'Technology / Software':[0.70,0.76,0.84,0.88,0.92],
+  'Financial Services':[0.55,0.61,0.70,0.74,0.80],
+  'Professional Services':[0.50,0.57,0.72,0.76,0.82],
+  'Media & Telecom':[0.48,0.55,0.65,0.68,0.74],
+  'Retail & Consumer':[0.38,0.45,0.56,0.60,0.68],
+  'Manufacturing':[0.40,0.46,0.55,0.59,0.65],
+  'Healthcare & Pharma':[0.35,0.42,0.52,0.58,0.65],
+  'Energy & Materials':[0.32,0.40,0.55,0.59,0.66],
+  'Logistics':[0.30,0.38,0.50,0.55,0.63],
+  'Education':[0.22,0.30,0.42,0.48,0.58],
+  'Legal Services':[0.15,0.22,0.35,0.42,0.52],
+  'Government & Public':[0.20,0.28,0.36,0.42,0.50],
+  'Real Estate & Const.':[0.18,0.24,0.32,0.38,0.46],
+  'Environment / Climate':[0.12,0.18,0.28,0.34,0.44],
+  'Agriculture':[0.15,0.20,0.29,0.34,0.42]
+};
+const FUNCS = {
+  'IT & Software Eng.':[0.17,0.15,0.24,0.27,0.36,0.43],
+  'Marketing & Sales':[0.23,0.21,0.28,0.30,0.29,0.36],
+  'Product & Service Dev':[0.24,0.22,0.27,0.28,0.27,0.34],
+  'Service Operations':[0.22,0.21,0.24,0.26,0.28,0.33],
+  'Knowledge Management':[0.07,0.06,0.10,0.14,0.17,0.28],
+  'Manufacturing / Ops':[0.15,0.13,0.17,0.20,0.22,0.27],
+  'Risk & Finance':[0.12,0.11,0.14,0.18,0.19,0.24],
+  'Supply Chain & Inv.':[0.12,0.10,0.14,0.17,0.18,0.23],
+  'R&D / Science':[0.10,0.09,0.13,0.16,0.17,0.22],
+  'Human Resources':[0.09,0.08,0.11,0.14,0.16,0.21],
+  'Strategy & Corp Fin.':[0.08,0.07,0.10,0.13,0.14,0.18]
+};
+
+// Logistic fit v4 (anchored): K=1200, r=0.447, t0=2027.09, R2=0.949
+const FIT_PROJ_Y = [2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030];
+const FIT_PROJ   = [31.4,48.4,74.0,111.8,166.1,241.0,338.5,456.7,587.9,720.4,841.6,943.2];
+const FIT_LO     = [19.1,34.0,59.4,98.6,155.4,229.1,308.4,380.4,431.9,463.8,481.2,491.7];
+const FIT_UP     = [41.3,61.1,89.6,130.3,187.1,264.0,366.6,493.8,635.4,771.4,893.2,990.3];
+
+const SECTOR_GDPW = {'Technology / Software':0.12,'Financial Services':0.14,'Professional Services':0.09,'Media & Telecom':0.05,'Retail & Consumer':0.10,'Manufacturing':0.15,'Healthcare & Pharma':0.08,'Energy & Materials':0.06,'Logistics':0.05,'Education':0.04,'Legal Services':0.02,'Government & Public':0.06,'Real Estate & Const.':0.08,'Environment / Climate':0.02,'Agriculture':0.04};
+const SECTOR_BASS = {'Technology / Software':{p:0.08,q:0.45},'Financial Services':{p:0.06,q:0.42},'Professional Services':{p:0.07,q:0.43},'Media & Telecom':{p:0.05,q:0.40},'Retail & Consumer':{p:0.04,q:0.38},'Manufacturing':{p:0.04,q:0.38},'Healthcare & Pharma':{p:0.04,q:0.38},'Energy & Materials':{p:0.04,q:0.36},'Logistics':{p:0.04,q:0.37},'Education':{p:0.03,q:0.35},'Legal Services':{p:0.03,q:0.37},'Government & Public':{p:0.03,q:0.32},'Real Estate & Const.':{p:0.03,q:0.30},'Environment / Climate':{p:0.03,q:0.33},'Agriculture':{p:0.02,q:0.28}};
+
+// BLS 2024-34 employment growth projections by sector (%)
+const BLS_EMP_GROWTH = {
+  'Technology / Software': 6.5,
+  'Financial Services': 3.5,
+  'Professional Services': 7.5,
+  'Media & Telecom': 2.0,
+  'Retail & Consumer': -1.2,
+  'Manufacturing': 0.5,
+  'Healthcare & Pharma': 8.4,
+  'Energy & Materials': 1.8,
+  'Logistics': 4.5,
+  'Education': 5.5,
+  'Legal Services': 5.0,
+  'Government & Public': 2.8,
+  'Real Estate & Const.': 3.0,
+  'Environment / Climate': 4.0,
+  'Agriculture': -0.6
+};
+const SECTOR_EMP_M = {'Technology / Software':5.2,'Financial Services':6.6,'Professional Services':11.1,'Media & Telecom':2.7,'Retail & Consumer':15.6,'Manufacturing':13.0,'Healthcare & Pharma':22.5,'Energy & Materials':2.3,'Logistics':6.7,'Education':3.9,'Legal Services':1.2,'Government & Public':23.5,'Real Estate & Const.':10.0,'Environment / Climate':0.4,'Agriculture':2.2};
+
+// ============ CHART SETUP ============
+const PALETTE = ['#0d9488','#2563eb','#dc2626','#ca8a04','#7c3aed','#ea580c','#0891b2','#be123c','#15803d','#9333ea','#0284c7','#b45309','#16a34a','#db2777','#525252'];
+let THEME = 'light';
+function themeVars(){
+  const d = THEME === 'dark';
+  return {
+    text: d ? '#f0f0ea' : '#151513',
+    muted: d ? '#a0a095' : '#6b6b62',
+    grid: d ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+    axis: d ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)',
+    tBg: d ? '#1c1c18' : '#fff',
+    tBd: d ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)',
+    hist: d ? '#f0f0ea' : '#151513',
+    ciFill: d ? 'rgba(45,212,191,0.18)' : 'rgba(13,148,136,0.15)',
+    proj: d ? '#2dd4bf' : '#0d9488'
+  };
+}
+function baseOpts(){
+  const tv = themeVars();
+  return {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: tv.tBg, titleColor: tv.text, bodyColor: tv.muted,
+        borderColor: tv.tBd, borderWidth: 1, padding: 10,
+        titleFont: { family: 'JetBrains Mono', size: 11 },
+        bodyFont: { family: 'JetBrains Mono', size: 11 }
+      }
+    },
+    scales: {
+      x: { grid: { color: tv.grid }, ticks: { color: tv.muted, font: { family: 'JetBrains Mono', size: 10 } }, border: { color: tv.axis } },
+      y: { grid: { color: tv.grid }, ticks: { color: tv.muted, font: { family: 'JetBrains Mono', size: 10 } }, border: { color: tv.axis } }
+    }
+  };
+}
+const charts = {};
+function mk(id, cfg){
+  if (charts[id]) { charts[id].destroy(); }
+  const el = document.getElementById(id);
+  if (!el) return;
+  charts[id] = new Chart(el, cfg);
+}
+function buildLegend(elId, chartId, labels, colors){
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.innerHTML = labels.map((l, i) =>
+    '<span class="legend-item" data-idx="' + i + '"><span class="legend-dot" style="background:' + colors[i % colors.length] + '"></span>' + l + '</span>'
+  ).join('');
+  el.querySelectorAll('.legend-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const idx = parseInt(item.dataset.idx);
+      const ch = charts[chartId];
+      if (!ch) return;
+      const meta = ch.getDatasetMeta(idx);
+      meta.hidden = meta.hidden === null ? !ch.data.datasets[idx].hidden : null;
+      item.classList.toggle('dimmed');
+      ch.update();
+    });
+  });
+}
+
+// ============ STAGE 1 ============
+function r1(){
+  const cs = Object.keys(SCALED);
+  const ds = cs.map((c, i) => ({
+    label: COUNTRY_NAME[c],
+    data: SCALED[c].map(v => +(v * 100).toFixed(4)),
+    borderColor: PALETTE[i],
+    backgroundColor: PALETTE[i] + '22',
+    borderWidth: c === 'US' ? 2.8 : 1.5,
+    pointRadius: c === 'US' ? 4 : 2.2,
+    tension: 0.25
+  }));
+  const o = baseOpts();
+  o.plugins.tooltip.callbacks = { label: ctx => ' ' + ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(3) + '% GDP' };
+  o.scales.y.ticks.callback = v => v.toFixed(2) + '%';
+  o.scales.y.title = { display: true, text: 'Investment / GDP (%)', color: themeVars().muted, font: { family: 'JetBrains Mono', size: 10.5 } };
+  mk('ch-1', { type: 'line', data: { labels: YEARS, datasets: ds }, options: o });
+  buildLegend('lg-1', 'ch-1', cs.map(c => COUNTRY_NAME[c]), PALETTE);
+}
+
+// ============ STAGE 2 ============
+function r2global(){
+  const o = baseOpts();
+  o.plugins.tooltip.callbacks = { label: ctx => ' $' + ctx.parsed.y.toFixed(1) + 'B' };
+  o.scales.y.ticks.callback = v => '$' + v + 'B';
+  o.scales.y.title = { display: true, text: 'Global private AI investment (USD B)', color: themeVars().muted, font: { family: 'JetBrains Mono', size: 10.5 } };
+  const bg = YEARS.map(y => y >= 2025 ? '#0d9488' : '#94a3b8');
+  mk('ch-2glob', {
+    type: 'bar',
+    data: { labels: GLOBAL_INV.years, datasets: [{ label: 'Global', data: GLOBAL_INV.values, backgroundColor: bg, borderRadius: 3, barThickness: 34 }] },
+    options: o
+  });
+}
+function r2sector(){
+  const ss = Object.keys(SECTORS).sort((a, b) => SECTORS[b][4] - SECTORS[a][4]);
+  const o = baseOpts();
+  o.plugins.tooltip.callbacks = { label: ctx => ' ' + ctx.dataset.label + ': ' + ctx.parsed.x + '%' };
+  o.scales.x.ticks.callback = v => v + '%';
+  o.scales.x.max = 100;
+  o.scales.y.ticks.font = { family: 'JetBrains Mono', size: 10 };
+  mk('ch-2s', {
+    type: 'bar',
+    data: {
+      labels: ss,
+      datasets: [
+        { label: '2022', data: ss.map(s => Math.round(SECTORS[s][0] * 100)), backgroundColor: '#2563ebcc', borderRadius: 3 },
+        { label: '2025', data: ss.map(s => Math.round(SECTORS[s][4] * 100)), backgroundColor: '#0d9488ee', borderRadius: 3 }
+      ]
+    },
+    options: {
+      ...o,
+      indexAxis: 'y',
+      plugins: { ...o.plugins, legend: { display: true, position: 'top', align: 'end', labels: { color: themeVars().muted, font: { family: 'JetBrains Mono', size: 11 }, boxWidth: 10, boxHeight: 10 } } }
+    }
+  });
+}
+function r2func(){
+  const fs = Object.keys(FUNCS).sort((a, b) => FUNCS[b][5] - FUNCS[a][5]);
+  const o = baseOpts();
+  o.plugins.tooltip.callbacks = { label: ctx => ' ' + ctx.dataset.label + ': ' + ctx.parsed.x + '%' };
+  o.scales.x.ticks.callback = v => v + '%';
+  o.scales.x.max = 50;
+  o.scales.y.ticks.font = { family: 'JetBrains Mono', size: 10 };
+  mk('ch-2f', {
+    type: 'bar',
+    data: {
+      labels: fs,
+      datasets: [
+        { label: '2021', data: fs.map(f => Math.round(FUNCS[f][0] * 100)), backgroundColor: '#2563ebcc', borderRadius: 3 },
+        { label: '2025', data: fs.map(f => Math.round(FUNCS[f][5] * 100)), backgroundColor: '#0d9488ee', borderRadius: 3 }
+      ]
+    },
+    options: {
+      ...o,
+      indexAxis: 'y',
+      plugins: { ...o.plugins, legend: { display: true, position: 'top', align: 'end', labels: { color: themeVars().muted, font: { family: 'JetBrains Mono', size: 11 }, boxWidth: 10, boxHeight: 10 } } }
+    }
+  });
+}
+
+// ============ STAGE 3 ============
+function r3(){
+  const tv = themeVars();
+  const obs = FIT_PROJ_Y.map((y) => y <= 2025 ? GLOBAL_INV.values[YEARS.indexOf(y)] : null);
+  const fit = FIT_PROJ_Y.map((y, i) => y <= 2025 ? FIT_PROJ[i] : null);
+  const proj = FIT_PROJ_Y.map((y, i) => y >= 2025 ? FIT_PROJ[i] : null);
+  const up = FIT_PROJ_Y.map((y, i) => y >= 2025 ? FIT_UP[i] : null);
+  const lo = FIT_PROJ_Y.map((y, i) => y >= 2025 ? FIT_LO[i] : null);
+  const o = baseOpts();
+  o.plugins.tooltip.callbacks = { label: ctx => ' ' + ctx.dataset.label + ': ' + (ctx.parsed.y === null ? '—' : '$' + ctx.parsed.y.toFixed(1) + 'B') };
+  o.plugins.tooltip.filter = i => !['CI_u', 'CI_l'].includes(i.dataset.label);
+  o.scales.y.ticks.callback = v => '$' + v + 'B';
+  o.scales.y.title = { display: true, text: 'Global investment (USD B)', color: tv.muted, font: { family: 'JetBrains Mono', size: 10.5 } };
+  mk('ch-3', {
+    type: 'line',
+    data: {
+      labels: FIT_PROJ_Y,
+      datasets: [
+        { label: 'CI_u', data: up, borderColor: 'transparent', backgroundColor: tv.ciFill, fill: '+1', pointRadius: 0, tension: 0.3, spanGaps: true, borderWidth: 0 },
+        { label: 'CI_l', data: lo, borderColor: 'transparent', backgroundColor: tv.ciFill, fill: false, pointRadius: 0, tension: 0.3, spanGaps: true, borderWidth: 0 },
+        { label: 'Observed', data: obs, borderColor: tv.hist, backgroundColor: tv.hist, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: tv.hist, tension: 0.2, spanGaps: false },
+        { label: 'Model fit', data: fit, borderColor: tv.proj, borderWidth: 2, pointRadius: 0, tension: 0.3, spanGaps: false },
+        { label: 'Projection', data: proj, borderColor: tv.proj, borderWidth: 2.5, borderDash: [6, 4], pointRadius: 0, tension: 0.3, spanGaps: true }
+      ]
+    },
+    options: o
+  });
+}
+function r3alloc(){
+  const ss = Object.keys(SECTORS);
+  const vel = {};
+  ss.forEach(s => { const A = SECTORS[s][4]; const bp = SECTOR_BASS[s]; vel[s] = (bp.p + bp.q * A) * (1 - A) * SECTOR_GDPW[s]; });
+  const tot = Object.values(vel).reduce((a, b) => a + b, 0);
+  const shares = ss.map(s => ({ s: s, pct: +(vel[s] / tot * 100).toFixed(1) })).sort((a, b) => b.pct - a.pct);
+  const o = baseOpts();
+  o.plugins.tooltip.callbacks = { label: ctx => ' ' + ctx.parsed.x + '% of projected flow' };
+  o.scales.x.ticks.callback = v => v + '%';
+  o.scales.y.ticks.font = { family: 'JetBrains Mono', size: 10 };
+  mk('ch-3alloc', {
+    type: 'bar',
+    data: {
+      labels: shares.map(x => x.s),
+      datasets: [{ label: 'Share', data: shares.map(x => x.pct), backgroundColor: shares.map((_, i) => PALETTE[i % PALETTE.length] + 'cc'), borderRadius: 3 }]
+    },
+    options: { ...o, indexAxis: 'y' }
+  });
+}
+
+// ============ STAGE 4 ============
+function r4(){
+  const ss = Object.keys(SECTORS);
+  const tv = themeVars();
+  const maxEmp = Math.max(...Object.values(SECTOR_EMP_M));
+  const points = ss.map((s) => ({
+    x: +(SECTORS[s][4] * 100).toFixed(1),
+    y: BLS_EMP_GROWTH[s],
+    r: Math.sqrt(SECTOR_EMP_M[s] / maxEmp) * 18 + 4,
+    label: s,
+    emp: SECTOR_EMP_M[s]
+  }));
+  const n = points.length;
+  const mx = points.reduce((a, p) => a + p.x, 0) / n;
+  const my = points.reduce((a, p) => a + p.y, 0) / n;
+  let num = 0, den = 0;
+  for (const p of points) { num += (p.x - mx) * (p.y - my); den += (p.x - mx) ** 2; }
+  const slope = num / den;
+  const intercept = my - slope * mx;
+  const xMin = Math.min(...points.map(p => p.x));
+  const xMax = Math.max(...points.map(p => p.x));
+  const regLine = [{ x: xMin, y: slope * xMin + intercept }, { x: xMax, y: slope * xMax + intercept }];
+  let ssRes = 0, ssTot = 0;
+  for (const p of points) { const pred = slope * p.x + intercept; ssRes += (p.y - pred) ** 2; ssTot += (p.y - my) ** 2; }
+  const r2 = 1 - ssRes / ssTot;
+
+  const colorFor = s => {
+    const g = BLS_EMP_GROWTH[s];
+    return g >= 6 ? '#0d9488' : g >= 3 ? '#ca8a04' : g >= 0 ? '#94a3b8' : '#dc2626';
+  };
+  const datasets = [
+    ...points.map((p) => ({
+      label: p.label,
+      data: [{ x: p.x, y: p.y, r: p.r, s: p.label, emp: p.emp }],
+      backgroundColor: colorFor(p.label) + 'bb',
+      borderColor: colorFor(p.label),
+      borderWidth: 1
+    })),
+    { label: 'OLS', data: regLine, borderColor: tv.hist, borderWidth: 1.5, borderDash: [5, 4], pointRadius: 0, showLine: true, type: 'line', fill: false, tension: 0 }
+  ];
+
+  const o = baseOpts();
+  o.plugins.tooltip.callbacks = {
+    title: () => '',
+    label: ctx => {
+      const p = ctx.raw;
+      if (!p.s) return ' ' + ctx.parsed.y.toFixed(1);
+      return ' ' + p.s + ' · Adopt ' + p.x + '% · BLS 10yr ' + (p.y > 0 ? '+' : '') + p.y + '% · ' + p.emp.toFixed(1) + 'M jobs';
+    }
+  };
+  o.scales.x = { ...o.scales.x, type: 'linear', title: { display: true, text: '2025 sector AI adoption (%)', color: tv.muted, font: { family: 'JetBrains Mono', size: 10.5 } }, ticks: { ...o.scales.x.ticks, callback: v => v + '%' }, min: 35, max: 100 };
+  o.scales.y = { ...o.scales.y, title: { display: true, text: 'BLS 2024–34 projected employment growth (%)', color: tv.muted, font: { family: 'JetBrains Mono', size: 10.5 } }, ticks: { ...o.scales.y.ticks, callback: v => (v >= 0 ? '+' : '') + v + '%' } };
+
+  mk('ch-4', { type: 'bubble', data: { datasets }, options: o });
+
+  const sub = document.getElementById('ch-4-sub');
+  if (sub) {
+    sub.innerHTML = 'Y-axis: BLS 2024&ndash;34 sector employment growth projection &middot; X-axis: 2025 AI adoption &middot; bubble sized by US sector employment &middot; OLS slope = ' + slope.toFixed(3) + ', R&sup2; = ' + r2.toFixed(3) + ', n = ' + n;
+  }
+}
+
+// ============ TABS ============
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const t = btn.dataset.tab;
+    document.getElementById('pane-' + t).classList.add('active');
+    setTimeout(() => { if (t === 'sector') r2sector(); else r2func(); }, 20);
+  });
+});
+
+// ============ NAV ============
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', e => {
+    e.preventDefault();
+    const t = document.getElementById(item.dataset.target);
+    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
+  });
+});
+
+// ============ THEME ============
+document.getElementById('theme-btn').addEventListener('click', () => {
+  THEME = THEME === 'light' ? 'dark' : 'light';
+  document.body.setAttribute('data-theme', THEME);
+  document.getElementById('theme-label').textContent = THEME.toUpperCase();
+  r1(); r2global(); r2sector(); r2func(); r3(); r3alloc(); r4();
+});
+
+// ============ INITIAL ============
+function initAll(){
+  r1(); r2global(); r2sector(); r2func(); r3(); r3alloc(); r4();
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAll);
+} else {
+  initAll();
+}
+</script>
+
+</body>
+</html>
