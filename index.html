@@ -345,13 +345,15 @@
       </div>
 
       <div class="card" style="margin-top:14px;">
-        <div class="card-title">Allocation forecast: where the projected flow is distributed across industries</div>
-        <div class="card-sub">Each sector&rsquo;s share = (Bass velocity &times; sector share of global output) / total. Bass velocity = current rate of adoption growth. Sector share of global output approximates the addressable revenue pool. Shares sum to 100% of total projected 2026&ndash;2030 flow.</div>
-        <div class="chart-wrap" style="height:280px"><canvas id="ch-3alloc" role="img" aria-label="Horizontal bar chart of projected sector allocation shares">Financial Services 14 percent, Manufacturing 13 percent, Tech 12 percent lead allocation.</canvas></div>
+        <div class="card-title">Projected industry allocation, 2026&ndash;2030 (cumulative dollars)</div>
+        <div class="card-sub" id="ch-3alloc-sub">Cumulative projected flow under the active scenario, distributed across 15 industries.</div>
+        <div class="chart-wrap" style="height:280px"><canvas id="ch-3alloc" role="img" aria-label="Horizontal bar chart of projected sector allocation in dollars">Financial Services, Manufacturing, and Technology receive the largest cumulative allocations.</canvas></div>
 
         <div class="findings">
           <span class="label">Allocation &mdash; where it&rsquo;s heading</span>
-          <strong>Financial Services (14%)</strong> and <strong>Technology (12%)</strong> absorb large shares because both show strong adoption momentum AND represent large portions of global output. <strong>Manufacturing (13%)</strong> ranks high not because of fast adoption growth (it&rsquo;s mid-pack at 65%) but because it is one of the <strong>largest sectors by share of global output (~15%)</strong>. Even a modest adoption rate applied to a very large revenue pool produces a large absolute investment opportunity. Conversely, sectors with fast adoption growth but small output shares &mdash; <strong>Legal Services (~2% of global output)</strong> and <strong>Environment / Climate (~2%)</strong> &mdash; receive smaller allocation shares despite strong velocity, because the total addressable revenue they represent is limited.
+          <strong>Financial Services (14% share)</strong> and <strong>Technology (12% share)</strong> absorb large allocations because both show strong adoption momentum <em>and</em> represent large portions of global output. <strong>Manufacturing (13% share)</strong> ranks high not because of fast adoption growth (it&rsquo;s mid-pack at 65%) but because it is one of the <strong>largest sectors by share of global output (~15%)</strong>. Even a modest adoption rate applied to a very large revenue pool produces a large absolute investment opportunity. Conversely, sectors with fast adoption growth but small output shares &mdash; <strong>Legal Services (~2% of global output)</strong> and <strong>Environment / Climate (~2%)</strong> &mdash; receive smaller allocations despite strong velocity, because the total addressable revenue they represent is limited.
+          <br><br>
+          <strong>Dollar magnitudes vs shares.</strong> The sector <em>shares</em> shown above are scenario-independent &mdash; they depend only on Bass velocity and output weight, not on K. The <em>dollar magnitudes</em>, however, scale directly with the active scenario&rsquo;s cumulative flow. Toggle between Conservative, Central, and Aggressive to see how much absolute capital each industry is projected to absorb under each economic story.
         </div>
       </div>
     </section>
@@ -839,19 +841,64 @@ function updateScenarioReadout(){
 }
 function r3alloc(){
   const ss = Object.keys(SECTORS);
+  const s = SCENARIOS[currentScenario];
+  // Compute Bass velocity × sector output share (scenario-independent)
   const vel = {};
-  ss.forEach(s => { const A = SECTORS[s][4]; const bp = SECTOR_BASS[s]; vel[s] = (bp.p + bp.q * A) * (1 - A) * SECTOR_GDPW[s]; });
+  ss.forEach(sec => {
+    const A = SECTORS[sec][4];
+    const bp = SECTOR_BASS[sec];
+    vel[sec] = (bp.p + bp.q * A) * (1 - A) * SECTOR_GDPW[sec];
+  });
   const tot = Object.values(vel).reduce((a, b) => a + b, 0);
-  const shares = ss.map(s => ({ s: s, pct: +(vel[s] / tot * 100).toFixed(1) })).sort((a, b) => b.pct - a.pct);
+  const shares = {};
+  ss.forEach(sec => shares[sec] = vel[sec] / tot);
+
+  // Cumulative projected flow 2026–2030 under the active scenario
+  // (sum of annual projections for years 2026 through 2030, i.e. indices 7–11)
+  const cumFlow = s.proj.slice(7, 12).reduce((a, b) => a + b, 0);
+
+  // Dollar allocation per sector = share × cumulative flow
+  const dollarAlloc = ss.map(sec => ({
+    s: sec,
+    dollars: shares[sec] * cumFlow,
+    pct: shares[sec] * 100
+  })).sort((a, b) => b.dollars - a.dollars);
+
+  // Update card subtitle with scenario-specific cumulative flow
+  const subEl = document.getElementById('ch-3alloc-sub');
+  if (subEl) {
+    const cumFormatted = cumFlow >= 1000
+      ? '$' + (cumFlow/1000).toFixed(2) + 'T'
+      : '$' + Math.round(cumFlow) + 'B';
+    subEl.innerHTML = 'Cumulative projected flow 2026&ndash;2030 under the <strong>' + s.label +
+      '</strong> scenario: <strong>' + cumFormatted +
+      '</strong>. Each sector&rsquo;s bar = Bass velocity &times; sector output share, rescaled to dollars. ' +
+      'Sector shares are scenario-independent; dollar magnitudes scale with K.';
+  }
+
   const o = baseOpts();
-  o.plugins.tooltip.callbacks = { label: ctx => ' ' + ctx.parsed.x + '% of projected flow' };
-  o.scales.x.ticks.callback = v => v + '%';
+  const tv = themeVars();
+  o.plugins.tooltip.callbacks = {
+    label: ctx => {
+      const d = ctx.raw;
+      const dStr = d >= 1000 ? '$' + (d/1000).toFixed(2) + 'T' : '$' + Math.round(d) + 'B';
+      return ' ' + dStr + ' cumulative 2026\u20132030 (' + dollarAlloc[ctx.dataIndex].pct.toFixed(1) + '% share)';
+    }
+  };
+  o.scales.x.ticks.callback = v => v >= 1000 ? '$' + (v/1000).toFixed(1) + 'T' : '$' + Math.round(v) + 'B';
+  o.scales.x.title = { display: true, text: 'Cumulative investment 2026\u20132030 (USD)', color: tv.muted, font: { family: 'JetBrains Mono', size: 10.5 } };
   o.scales.y.ticks.font = { family: 'JetBrains Mono', size: 10 };
+
   mk('ch-3alloc', {
     type: 'bar',
     data: {
-      labels: shares.map(x => x.s),
-      datasets: [{ label: 'Share', data: shares.map(x => x.pct), backgroundColor: shares.map((_, i) => PALETTE[i % PALETTE.length] + 'cc'), borderRadius: 3 }]
+      labels: dollarAlloc.map(x => x.s),
+      datasets: [{
+        label: 'Allocation',
+        data: dollarAlloc.map(x => x.dollars),
+        backgroundColor: dollarAlloc.map((_, i) => PALETTE[i % PALETTE.length] + 'cc'),
+        borderRadius: 3
+      }]
     },
     options: { ...o, indexAxis: 'y' }
   });
@@ -957,6 +1004,7 @@ document.querySelectorAll('.scenario-btn').forEach(btn => {
     currentScenario = btn.dataset.scenario;
     updateScenarioReadout();
     r3();
+    r3alloc();
   });
 });
 
@@ -979,6 +1027,9 @@ if (document.readyState === 'loading') {
   initAll();
 }
 </script>
+
+</body>
+</html>
 
 </body>
 </html>
