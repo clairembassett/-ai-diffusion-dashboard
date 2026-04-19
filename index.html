@@ -126,14 +126,17 @@
     .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
 
     /* Scenario selector */
-    .scenario-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
-    .scenario-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.7px;font-weight:500;}
-    .scenario-buttons{display:inline-flex;background:var(--surface-alt);border:1px solid var(--border);border-radius:7px;padding:3px;gap:3px;}
-    .scenario-btn{font-family:'Satoshi',sans-serif;font-size:11.5px;font-weight:500;background:none;border:none;color:var(--muted);cursor:pointer;padding:6px 12px;border-radius:5px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;line-height:1.1;transition:all 0.12s;}
+    .scenario-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
+    .scenario-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.7px;font-weight:500;padding-top:8px;}
+    .scenario-buttons{display:inline-flex;background:var(--surface-alt);border:1px solid var(--border);border-radius:7px;padding:3px;gap:3px;flex:1;min-width:0;}
+    .scenario-btn{font-family:'Satoshi',sans-serif;background:none;border:none;color:var(--muted);cursor:pointer;padding:8px 12px;border-radius:5px;display:flex;flex-direction:column;align-items:flex-start;gap:3px;line-height:1.2;transition:all 0.12s;flex:1;min-width:0;text-align:left;}
     .scenario-btn:hover:not(.active){background:var(--surface);color:var(--text);}
     .scenario-btn.active{background:var(--accent);color:#fff;}
+    .scenario-name{display:flex;align-items:baseline;gap:8px;font-size:12px;font-weight:600;width:100%;}
     .scenario-btn.active .scenario-k{color:rgba(255,255,255,0.85);}
-    .scenario-k{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint);letter-spacing:0.3px;}
+    .scenario-btn.active .scenario-story{color:rgba(255,255,255,0.92);}
+    .scenario-k{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--faint);letter-spacing:0.3px;font-weight:500;}
+    .scenario-story{font-size:10.5px;font-weight:400;color:var(--muted);line-height:1.35;letter-spacing:0;}
     .param-readout{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px;padding:10px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
     .param-item{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;}
     .param-k{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);font-weight:500;}
@@ -152,7 +155,8 @@
       .stat-row{grid-template-columns:1fr;}
       .arrow{display:none;}
       .param-readout{grid-template-columns:repeat(3,1fr);row-gap:12px;}
-      .scenario-buttons{flex-wrap:wrap;}
+      .scenario-buttons{flex-direction:column;gap:2px;}
+      .scenario-btn{padding:10px 12px;}
     }
     @media (max-width: 500px){
       .arc{grid-template-columns:1fr;}
@@ -160,6 +164,7 @@
       .framework h1{font-size:18px;}
       .param-readout{grid-template-columns:repeat(2,1fr);}
       .scenario-row{flex-direction:column;align-items:flex-start;gap:8px;}
+      .scenario-label{padding-top:0;}
     }
   </style>
 </head>
@@ -246,21 +251,21 @@
       <div class="sec-head">
         <span class="sec-tag s2">STAGE 02 &middot; CONCENTRATION</span>
         <div class="sec-title">Where aggregate investment is concentrating, in levels</div>
-        <div class="sec-lede">Now we <strong>switch to unscaled global levels</strong> to identify where investment growth is actually going. Intensity told us which countries can diffuse; levels tell us which industries and functions are absorbing the capital. Because we&rsquo;re interested in the global distribution of flows, GDP-scaling would obscure the thing we want to see.</div>
-        <div class="sec-desc">Global corporate AI investment reached $252.3B in 2024 and $581.7B in 2025 (Stanford AI Index 2026). Underneath, adoption rates by industry (McKinsey + IBM + PwC + Stanford AI Index 2023&ndash;2025) and by business function (McKinsey Global Survey 2021&ndash;2025) reveal the distributional structure.</div>
+        <div class="sec-lede">Now we <strong>switch to unscaled global levels</strong> to identify where investment growth is actually going. Intensity told us which countries can diffuse; levels tell us which industries and functions are absorbing the capital. Because we&rsquo;re interested in the global distribution of flows, GDP-scaling would obscure the thing we want to see. Throughout this stage we use <strong>private AI investment</strong> specifically &mdash; the same measure used to fit the forecast in Stage 3 &mdash; rather than total corporate activity (which would also include M&amp;A and public offerings).</div>
+        <div class="sec-desc">Global private AI investment reached $252.3B in 2024 and $344.7B in 2025 (Stanford AI Index 2026). Underneath, adoption rates by industry (McKinsey + IBM + PwC + Stanford AI Index 2023&ndash;2025) and by business function (McKinsey Global Survey 2021&ndash;2025) reveal the distributional structure.</div>
       </div>
 
       <div class="kpi-strip">
-        <div class="kpi p2"><div class="kpi-l">Global private 2025</div><div class="kpi-v">$344.7B</div><div class="kpi-s">+127.5% YoY &middot; Stanford AI Index 2026</div></div>
-        <div class="kpi p2"><div class="kpi-l">Global corporate 2025</div><div class="kpi-v">$581.7B</div><div class="kpi-s">M&amp;A + private + public &middot; Stanford AI Index 2026</div></div>
-        <div class="kpi p2"><div class="kpi-l">GenAI subset 2025</div><div class="kpi-v">$170.9B</div><div class="kpi-s">49.6% of private AI &middot; Stanford AI Index 2026</div></div>
+        <div class="kpi p2"><div class="kpi-l">Global private 2025</div><div class="kpi-v">$344.7B</div><div class="kpi-s">+36.6% YoY &middot; forecast anchor &middot; Stanford AI Index 2026</div></div>
+        <div class="kpi p2"><div class="kpi-l">Global corporate 2025</div><div class="kpi-v">$581.7B</div><div class="kpi-s">Private + M&amp;A + public + minority &middot; for context only</div></div>
+        <div class="kpi p2"><div class="kpi-l">GenAI (private subset)</div><div class="kpi-v">$170.9B</div><div class="kpi-s">49.6% of private AI &middot; Stanford AI Index 2026</div></div>
         <div class="kpi p2"><div class="kpi-l">Fastest function gain</div><div class="kpi-v">IT +26pp</div><div class="kpi-s">17% &rarr; 43% (2021&ndash;25) &middot; McKinsey</div></div>
       </div>
 
       <div class="card" style="margin-top:14px;">
-        <div class="card-title">Global AI investment in levels</div>
-        <div class="card-sub">USD billions &middot; raw (not scaled) &middot; Stanford AI Index 2025 (2019&ndash;2024) &amp; 2026 (2025)</div>
-        <div class="chart-wrap" style="height:240px"><canvas id="ch-2glob" role="img" aria-label="Global AI investment from 2019 to 2025 in USD billions">Global investment grew from 40 billion in 2019 to 345 billion in 2025.</canvas></div>
+        <div class="card-title">Global private AI investment, in levels</div>
+        <div class="card-sub">USD billions &middot; raw (not scaled by GDP) &middot; private investment only (excludes M&amp;A, public offerings, minority stakes) &middot; Stanford AI Index 2025 (2019&ndash;2024) &amp; 2026 (2025)</div>
+        <div class="chart-wrap" style="height:240px"><canvas id="ch-2glob" role="img" aria-label="Global private AI investment from 2019 to 2025 in USD billions">Private investment grew from 40 billion in 2019 to 345 billion in 2025.</canvas></div>
       </div>
 
       <div class="card" style="margin-top:14px;">
@@ -300,29 +305,42 @@
         <div class="scenario-row">
           <div class="scenario-label">Scenario:</div>
           <div class="scenario-buttons" role="tablist" aria-label="Ceiling scenario selector">
-            <button class="scenario-btn" data-scenario="conservative" type="button" role="tab" aria-selected="false">Conservative<span class="scenario-k">K = $510B</span></button>
-            <button class="scenario-btn active" data-scenario="central" type="button" role="tab" aria-selected="true">Central<span class="scenario-k">K = $850B</span></button>
-            <button class="scenario-btn" data-scenario="aggressive" type="button" role="tab" aria-selected="false">Aggressive<span class="scenario-k">K = $1,700B</span></button>
+            <button class="scenario-btn" data-scenario="conservative" type="button" role="tab" aria-selected="false">
+              <span class="scenario-name">Conservative<span class="scenario-k">K = $1.03T</span></span>
+              <span class="scenario-story">GenAI investment peaks near current levels and cools</span>
+            </button>
+            <button class="scenario-btn active" data-scenario="central" type="button" role="tab" aria-selected="true">
+              <span class="scenario-name">Central<span class="scenario-k">K = $1.72T</span></span>
+              <span class="scenario-story">Trajectory continues, maturity arrives late decade</span>
+            </button>
+            <button class="scenario-btn" data-scenario="aggressive" type="button" role="tab" aria-selected="false">
+              <span class="scenario-name">Aggressive<span class="scenario-k">K = $3.45T</span></span>
+              <span class="scenario-story">AGI-transformation scenario, peak growth still ahead</span>
+            </button>
           </div>
         </div>
 
         <div class="param-readout" id="param-readout">
-          <div class="param-item"><span class="param-k">K</span><span class="param-v" id="param-K">$850B</span><span class="param-hint">ceiling</span></div>
-          <div class="param-item"><span class="param-k">r</span><span class="param-v" id="param-r">0.484</span><span class="param-hint">growth rate</span></div>
-          <div class="param-item"><span class="param-k">t&#8320;</span><span class="param-v" id="param-t0">2025.9</span><span class="param-hint">inflection year</span></div>
-          <div class="param-item"><span class="param-k">R&sup2;</span><span class="param-v" id="param-r2">0.944</span><span class="param-hint">fit quality</span></div>
-          <div class="param-item"><span class="param-k">2030</span><span class="param-v" id="param-2030">$748B</span><span class="param-hint">central projection</span></div>
+          <div class="param-item"><span class="param-k">K</span><span class="param-v" id="param-K">$1.72T</span><span class="param-hint">ceiling</span></div>
+          <div class="param-item"><span class="param-k">r</span><span class="param-v" id="param-r">0.423</span><span class="param-hint">growth rate</span></div>
+          <div class="param-item"><span class="param-k">t&#8320;</span><span class="param-v" id="param-t0">2028.3</span><span class="param-hint">inflection year</span></div>
+          <div class="param-item"><span class="param-k">R&sup2;</span><span class="param-v" id="param-r2">0.951</span><span class="param-hint">fit quality</span></div>
+          <div class="param-item"><span class="param-k">2030</span><span class="param-v" id="param-2030">$1157B</span><span class="param-hint">central projection</span></div>
         </div>
 
         <div class="chart-wrap" style="height:340px"><canvas id="ch-3" role="img" aria-label="Global AI investment forecast with three scenario toggles">Central scenario projects 748 billion by 2030 with inflection in late 2025.</canvas></div>
 
         <div class="findings">
           <span class="label">Forecast &mdash; model properties</span>
-          The fitted curve describes <strong>the total annual flow of global private AI investment</strong>, not a cumulative sum. <strong>K</strong> is not estimated from the data; it is <em>calibrated</em> to a range of scenarios anchored at 2024 private investment ($170B, Stanford AI Index) scaled by 3&times;, 5&times;, and 10&times;. These scenarios span $510B (early saturation), $850B (central), and $1.7T (sustained growth).
+          The fitted curve describes <strong>the total annual flow of global private AI investment</strong>, not a cumulative sum. <strong>K</strong> is not estimated from the data; it is <em>calibrated</em> to a range of scenarios anchored at 2025 private investment ($344.7B, Stanford AI Index 2026) scaled by 3&times;, 5&times;, and 10&times;. Each scenario corresponds to a distinct economic story:
           <br><br>
-          Under the <strong>central scenario (K = $850B)</strong>, the fitted inflection lands at <strong>t&#8320; &asymp; 2025.9</strong> &mdash; meaning the 2024&ndash;2025 surge itself is the inflection. Annual flow continues to grow through 2030 but at a decelerating pace. Central 2030 estimate is <strong>$748B</strong> (80% CI $695B&ndash;$782B).
+          &mdash; <strong>Conservative (K = $1.03T):</strong> GenAI investment peaks near current levels and cools. The 2024&ndash;2025 surge is the sector's peak acceleration; the inflection has effectively passed (t&#8320; &asymp; 2026.6), and annual flow decelerates toward $857B by 2030. This is the &ldquo;GenAI investment bubble deflates&rdquo; scenario.
           <br><br>
-          Fit quality (R&sup2;) ranges only from 0.925 to 0.951 across the three K scenarios &mdash; the seven observations cannot distinguish between them. The scenario toggle lets you inspect how ceiling assumptions propagate to projections; the fit statistics below update with your selection.
+          &mdash; <strong>Central (K = $1.72T):</strong> Trajectory continues, maturity arrives late decade. Peak acceleration is still ~2.5 years ahead (t&#8320; &asymp; 2028.3); annual flow reaches <strong>$1,157B</strong> by 2030 (80% CI $1,009B&ndash;$1,280B), with maturity and deceleration emerging in the early 2030s.
+          <br><br>
+          &mdash; <strong>Aggressive (K = $3.45T):</strong> AGI-transformation scenario, peak growth still ahead. Inflection doesn't arrive until 2030 itself (t&#8320; &asymp; 2030.5); annual flow crosses $1.5T by 2030 and continues accelerating. Requires private AI investment to ultimately exceed Gartner's 2026 total-AI-spending forecast.
+          <br><br>
+          Fit quality (R&sup2;) ranges only from 0.947 to 0.953 across the three scenarios &mdash; seven observations cannot meaningfully distinguish between them. The scenario toggle lets you inspect how ceiling assumptions propagate to projections; the fit statistics above update with your selection.
         </div>
       </div>
 
@@ -381,7 +399,7 @@
       <div class="synth-card">
         <h2>Synthesis &mdash; connecting the four stages</h2>
         <p><strong>Stage 01 &rarr; 02:</strong> National diffusion capacity is extraordinarily concentrated &mdash; the US expanded AI investment intensity <strong>11.3&times;</strong> since 2019 (0.11% &rarr; 1.24% of GDP) while most of the panel flatlined below 0.20% (Stanford AI Index 2025 &amp; 2026; IMF real GDP). That capacity concentration translates directly into <em>where</em> global flows go: 83% of 2025 private AI investment landed in the US ($285.9B of $344.7B).</p>
-        <p><strong>Stage 02 &rarr; 03:</strong> Within the global flow, capital concentrates in information-intensive industries (Technology, Financial Services, Professional Services) and knowledge-work functions (IT &amp; Software Engineering, Marketing, Product). The logistic model is presented as three scenarios &mdash; <strong>conservative, central, and aggressive</strong> &mdash; anchored at 2024 private investment ($170B) scaled by 3&times;, 5&times;, and 10&times;, giving saturation ceilings of $510B, $850B, and $1.7T. Under the <strong>central scenario</strong>, inflection occurs in 2025.9 and 2030 annual flow reaches $748B. The Bass-velocity allocation model distributes projected flow toward sectors combining high adoption momentum with large global output share &mdash; Financial Services, Technology, and Manufacturing.</p>
+        <p><strong>Stage 02 &rarr; 03:</strong> Within the global flow, capital concentrates in information-intensive industries (Technology, Financial Services, Professional Services) and knowledge-work functions (IT &amp; Software Engineering, Marketing, Product). The logistic model is presented as three scenarios &mdash; <strong>conservative, central, and aggressive</strong> &mdash; anchored at 2025 private investment ($344.7B) scaled by 3&times;, 5&times;, and 10&times;, giving saturation ceilings of $1.03T, $1.72T, and $3.45T. Under the <strong>central scenario</strong>, inflection occurs in 2028.3 and 2030 annual flow reaches $1.16T. The Bass-velocity allocation model distributes projected flow toward sectors combining high adoption momentum with large global output share &mdash; Financial Services, Technology, and Manufacturing.</p>
         <p><strong>Stage 03 &rarr; 04:</strong> The sector-level labor evidence is <em>not</em> a story of aggregate displacement &mdash; BLS projects the highest-adoption sectors to gain jobs through 2034 (BLS MLR 2026). But sector totals hide occupational composition: Brynjolfsson, Chandar &amp; Chen (2025) document a <strong>13% employment decline for AI-exposed workers aged 22&ndash;25</strong> even in sectors that are growing. This is the complementarity-vs-substitution split (Acemoglu &amp; Restrepo 2018, 2022; Autor 2024; Frey &amp; Osborne 2017) playing out at the occupational rather than sector level.</p>
         <p><strong>Research-question answer:</strong> Global AI investment shapes diffusion patterns through three mechanisms &mdash; (1) concentrating national capacity in a small set of economies, (2) channelling capital into information-intensive sectors where adoption is easiest, and (3) restructuring occupational demand within otherwise growing sectors. The labor consequences are <em>distributional</em>, not aggregate, which means standard sector-level employment indicators are inadequate for monitoring them.</p>
       </div>
@@ -389,7 +407,7 @@
       <div class="footer">
         <strong style="color:var(--text);font-style:normal;">Data sources.</strong> Private AI investment: Stanford AI Index 2025 (2019&ndash;2024) &amp; Stanford AI Index 2026 (2025). Real GDP: IMF World Economic Outlook &amp; World Bank (2025 projected from IMF growth rates). Sector adoption: McKinsey State of AI 2023&ndash;2025, IBM AI Adoption Index, NAM 2025 Manufacturing Survey, Oxford Insights, Stanford AI Index 2025. Business function adoption: McKinsey Global Survey on AI 2021&ndash;2025. US sector employment &amp; projections: BLS Monthly Labor Review 2026 (&ldquo;Industry and occupational employment projections 2024&ndash;34&rdquo;) &amp; BLS Current Employment Statistics 2023. Early-career displacement: Brynjolfsson, Chandar &amp; Chen (2025), &ldquo;Canaries in the Coal Mine: Generative AI and Early-Career Employment.&rdquo; Complementarity/substitution literature: Acemoglu &amp; Restrepo (2018, 2020, 2022), Autor (2024), Frey &amp; Osborne (2017).
         <br><br>
-        <strong style="color:var(--text);font-style:normal;">Limitations.</strong> 10-country panel; adoption figures from self-reported surveys; country-level adoption not directly measured; BLS labor data is US-only; logistic forecast uncertainty widens beyond 2027. The saturation ceiling K is not identified from the seven-point series; instead we present three scenarios anchored at the 2024 observed private investment level ($170B, Stanford AI Index) scaled by 3&times;, 5&times;, and 10&times;. Fit quality (R&sup2;) differs only marginally across scenarios (0.925&ndash;0.951), confirming that n=7 data cannot distinguish between plausible ceilings. Pairing sector adoption with projected employment is descriptive, not causal.
+        <strong style="color:var(--text);font-style:normal;">Limitations.</strong> 10-country panel; adoption figures from self-reported surveys; country-level adoption not directly measured; BLS labor data is US-only; logistic forecast uncertainty widens beyond 2027. The saturation ceiling K is not identified from the seven-point series; instead we present three scenarios anchored at the 2025 observed private investment level ($344.7B, Stanford AI Index 2026) scaled by 3&times;, 5&times;, and 10&times;. Fit quality (R&sup2;) differs only marginally across scenarios (0.947&ndash;0.953), confirming that n=7 data cannot distinguish between plausible ceilings. Pairing sector adoption with projected employment is descriptive, not causal.
       </div>
     </section>
 
@@ -448,31 +466,31 @@ const FUNCS = {
   'Strategy & Corp Fin.':[0.08,0.07,0.10,0.13,0.14,0.18]
 };
 
-// Logistic fit — three scenarios anchored at 2024 AI Index private investment ($170B) × {3, 5, 10}
+// Logistic fit — three scenarios anchored at 2025 private AI investment ($344.7B) × {3, 5, 10}
 // Each scenario fixes K and fits r, t0 by nonlinear least squares on 2019–2025 observations.
 // 80% CI from residual bootstrap (1,000 resamples).
 const FIT_PROJ_Y = [2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030];
 const SCENARIOS = {
   conservative: {
     label: 'Conservative (3\u00d7 anchor)',
-    K: 510, r: 0.5925, t0: 2024.10, R2: 0.9251, RMSE: 28.43,
-    proj:  [23.7, 41.3, 70.1, 114.0, 174.7, 247.4, 321.3, 385.0, 432.4, 463.9, 483.5, 495.0],
-    lower: [15.3, 29.7, 56.3, 99.3, 161.4, 229.9, 294.1, 351.6, 399.7, 436.0, 461.8, 479.0],
-    upper: [39.7, 61.4, 93.5, 137.7, 197.4, 273.3, 352.7, 415.7, 457.9, 482.4, 495.8, 502.9]
+    K: 1034, r: 0.4608, t0: 2026.58, R2: 0.9470, RMSE: 23.90,
+    proj:  [30.6, 47.7, 73.6, 112.0, 166.9, 241.8, 337.2, 448.9, 567.5, 680.9, 779.1, 857.1],
+    lower: [22.6, 37.7, 61.4, 99.0, 154.6, 227.7, 310.7, 405.3, 506.4, 607.3, 701.9, 784.3],
+    upper: [43.2, 62.9, 90.8, 129.7, 184.0, 260.0, 367.0, 492.8, 624.3, 743.4, 839.7, 909.1]
   },
   central: {
     label: 'Central (5\u00d7 anchor)',
-    K: 850, r: 0.4841, t0: 2025.89, R2: 0.9441, RMSE: 24.54,
-    proj:  [29.2, 46.4, 72.9, 112.2, 168.3, 243.1, 334.9, 436.4, 536.6, 625.0, 695.7, 747.8],
-    lower: [21.2, 36.2, 60.4, 99.1, 156.2, 228.5, 308.7, 395.0, 483.2, 565.4, 636.6, 695.2],
-    upper: [42.4, 62.3, 90.8, 130.9, 186.2, 262.6, 365.0, 477.3, 585.2, 674.3, 738.8, 781.8]
+    K: 1724, r: 0.4229, t0: 2028.31, R2: 0.9510, RMSE: 23.00,
+    proj:  [32.9, 49.7, 74.8, 111.6, 164.7, 239.4, 340.6, 470.9, 628.4, 804.8, 986.1, 1156.9],
+    lower: [24.9, 39.8, 63.0, 98.7, 152.3, 225.7, 314.3, 423.7, 551.6, 696.6, 851.4, 1008.7],
+    upper: [44.9, 64.1, 91.1, 128.2, 180.4, 256.4, 370.7, 521.7, 706.9, 910.1, 1107.6, 1280.3]
   },
   aggressive: {
     label: 'Aggressive (10\u00d7 anchor)',
-    K: 1700, r: 0.4237, t0: 2028.27, R2: 0.9509, RMSE: 23.01,
-    proj:  [32.9, 49.7, 74.8, 111.6, 164.8, 239.5, 340.5, 470.4, 627.1, 801.8, 980.8, 1148.6],
-    lower: [24.9, 39.8, 63.0, 98.7, 152.4, 225.8, 314.3, 423.3, 550.6, 694.5, 847.7, 1002.8],
-    upper: [44.9, 64.1, 91.1, 128.2, 180.4, 256.5, 370.6, 521.0, 704.8, 906.0, 1100.5, 1269.3]
+    K: 3447, r: 0.3983, t0: 2030.53, R2: 0.9530, RMSE: 22.52,
+    proj:  [34.5, 51.1, 75.6, 111.4, 163.3, 237.7, 342.5, 486.5, 677.7, 920.7, 1212.8, 1540.9],
+    lower: [26.4, 41.1, 63.8, 98.7, 150.9, 224.5, 316.8, 436.4, 586.4, 776.5, 1004.0, 1266.6],
+    upper: [46.3, 65.0, 91.1, 127.3, 178.2, 254.2, 372.8, 543.9, 777.9, 1077.6, 1430.2, 1815.5]
   }
 };
 let currentScenario = 'central'; // default view
