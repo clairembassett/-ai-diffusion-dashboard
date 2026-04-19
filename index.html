@@ -125,6 +125,22 @@
     .footer{margin-top:32px;padding-top:18px;border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--faint);font-style:italic;line-height:1.65;}
     .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
 
+    /* Scenario selector */
+    .scenario-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
+    .scenario-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.7px;font-weight:500;}
+    .scenario-buttons{display:inline-flex;background:var(--surface-alt);border:1px solid var(--border);border-radius:7px;padding:3px;gap:3px;}
+    .scenario-btn{font-family:'Satoshi',sans-serif;font-size:11.5px;font-weight:500;background:none;border:none;color:var(--muted);cursor:pointer;padding:6px 12px;border-radius:5px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;line-height:1.1;transition:all 0.12s;}
+    .scenario-btn:hover:not(.active){background:var(--surface);color:var(--text);}
+    .scenario-btn.active{background:var(--accent);color:#fff;}
+    .scenario-btn.active .scenario-k{color:rgba(255,255,255,0.85);}
+    .scenario-k{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint);letter-spacing:0.3px;}
+    .param-readout{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px;padding:10px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+    .param-item{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;}
+    .param-k{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);font-weight:500;}
+    .param-v{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);font-weight:500;transition:color 0.15s;}
+    .param-v.changing{color:var(--accent);}
+    .param-hint{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint);text-transform:lowercase;letter-spacing:0.3px;}
+
     /* Responsive */
     @media (max-width: 900px){
       .layout{grid-template-columns:1fr;}
@@ -135,11 +151,15 @@
       .kpi-strip{grid-template-columns:1fr 1fr;}
       .stat-row{grid-template-columns:1fr;}
       .arrow{display:none;}
+      .param-readout{grid-template-columns:repeat(3,1fr);row-gap:12px;}
+      .scenario-buttons{flex-wrap:wrap;}
     }
     @media (max-width: 500px){
       .arc{grid-template-columns:1fr;}
       .kpi-strip{grid-template-columns:1fr;}
       .framework h1{font-size:18px;}
+      .param-readout{grid-template-columns:repeat(2,1fr);}
+      .scenario-row{flex-direction:column;align-items:flex-start;gap:8px;}
     }
   </style>
 </head>
@@ -275,12 +295,34 @@
 
       <div class="card">
         <div class="card-title">Global AI investment &mdash; total annual flow, observed &amp; projected</div>
-        <div class="card-sub">I(t) = K / [1 + exp(&minus;r(t &minus; t&#8320;))] &middot; fitted on global private investment 2019&ndash;2025 &middot; K = $1,200B (annual ceiling), r = 0.447 (growth rate), t&#8320; = 2027.1 (inflection year) &middot; 80% CI from residual bootstrap (1,000 resamples) &middot; data: Stanford AI Index 2025 &amp; 2026</div>
-        <div class="chart-wrap" style="height:300px"><canvas id="ch-3" role="img" aria-label="Global AI investment forecast to 2030 with confidence band">Projection reaches 943 billion by 2030, 80 percent CI 492 to 990 billion.</canvas></div>
+        <div class="card-sub">I(t) = K / [1 + exp(&minus;r(t &minus; t&#8320;))] &middot; fitted on global private investment 2019&ndash;2025 &middot; 80% CI from residual bootstrap (1,000 resamples) &middot; data: Stanford AI Index 2025 &amp; 2026</div>
+
+        <div class="scenario-row">
+          <div class="scenario-label">Scenario:</div>
+          <div class="scenario-buttons" role="tablist" aria-label="Ceiling scenario selector">
+            <button class="scenario-btn" data-scenario="conservative" type="button" role="tab" aria-selected="false">Conservative<span class="scenario-k">K = $510B</span></button>
+            <button class="scenario-btn active" data-scenario="central" type="button" role="tab" aria-selected="true">Central<span class="scenario-k">K = $850B</span></button>
+            <button class="scenario-btn" data-scenario="aggressive" type="button" role="tab" aria-selected="false">Aggressive<span class="scenario-k">K = $1,700B</span></button>
+          </div>
+        </div>
+
+        <div class="param-readout" id="param-readout">
+          <div class="param-item"><span class="param-k">K</span><span class="param-v" id="param-K">$850B</span><span class="param-hint">ceiling</span></div>
+          <div class="param-item"><span class="param-k">r</span><span class="param-v" id="param-r">0.484</span><span class="param-hint">growth rate</span></div>
+          <div class="param-item"><span class="param-k">t&#8320;</span><span class="param-v" id="param-t0">2025.9</span><span class="param-hint">inflection year</span></div>
+          <div class="param-item"><span class="param-k">R&sup2;</span><span class="param-v" id="param-r2">0.944</span><span class="param-hint">fit quality</span></div>
+          <div class="param-item"><span class="param-k">2030</span><span class="param-v" id="param-2030">$748B</span><span class="param-hint">central projection</span></div>
+        </div>
+
+        <div class="chart-wrap" style="height:340px"><canvas id="ch-3" role="img" aria-label="Global AI investment forecast with three scenario toggles">Central scenario projects 748 billion by 2030 with inflection in late 2025.</canvas></div>
 
         <div class="findings">
           <span class="label">Forecast &mdash; model properties</span>
-          The fitted curve describes <strong>the total annual flow of global private AI investment</strong>, not a cumulative sum. Inflection at <strong>t&#8320; &asymp; 2027</strong> means peak annual acceleration is within 12 months; growth then decelerates as annual flow approaches the $1.2T ceiling. Central 2030 estimate is <strong>$943B</strong> in annual investment (80% CI $492B&ndash;$990B). The ceiling K is externally anchored to Gartner&rsquo;s $2.5T total-AI-spending forecast for 2026 &mdash; private investment has historically run at ~20&ndash;30% of total AI spending.
+          The fitted curve describes <strong>the total annual flow of global private AI investment</strong>, not a cumulative sum. <strong>K</strong> is not estimated from the data; it is <em>calibrated</em> to a range of scenarios anchored at 2024 private investment ($170B, Stanford AI Index) scaled by 3&times;, 5&times;, and 10&times;. These scenarios span $510B (early saturation), $850B (central), and $1.7T (sustained growth).
+          <br><br>
+          Under the <strong>central scenario (K = $850B)</strong>, the fitted inflection lands at <strong>t&#8320; &asymp; 2025.9</strong> &mdash; meaning the 2024&ndash;2025 surge itself is the inflection. Annual flow continues to grow through 2030 but at a decelerating pace. Central 2030 estimate is <strong>$748B</strong> (80% CI $695B&ndash;$782B).
+          <br><br>
+          Fit quality (R&sup2;) ranges only from 0.925 to 0.951 across the three K scenarios &mdash; the seven observations cannot distinguish between them. The scenario toggle lets you inspect how ceiling assumptions propagate to projections; the fit statistics below update with your selection.
         </div>
       </div>
 
@@ -323,8 +365,8 @@
 
       <div class="card">
         <div class="card-title">Sector AI adoption (2025) vs projected 10-year employment growth</div>
-        <div class="card-sub" id="ch-4-sub">Y-axis: BLS 2024&ndash;34 sector employment growth projection (Monthly Labor Review 2026) &middot; X-axis: 2025 AI adoption (McKinsey / Stanford AI Index 2025) &middot; bubble sized by US sector employment (BLS CES 2023)</div>
-        <div class="chart-wrap" style="height:340px"><canvas id="ch-4" role="img" aria-label="Scatter plot of sector AI adoption versus BLS employment growth projection">Mildly positive association; retail shows high adoption with negative employment growth.</canvas></div>
+        <div class="card-sub" id="ch-4-sub">Y-axis: BLS 2024&ndash;34 sector employment growth projection (Monthly Labor Review 2026) &middot; X-axis: 2025 AI adoption (McKinsey / Stanford AI Index 2025) &middot; bubble sized by US sector employment (BLS CES 2023) &middot; n = 15 sectors</div>
+        <div class="chart-wrap" style="height:340px"><canvas id="ch-4" role="img" aria-label="Bubble chart of sector AI adoption versus BLS employment growth projection">High-adoption sectors like Tech and Healthcare are projected to gain jobs; Retail shows high adoption paired with projected losses.</canvas></div>
 
         <div class="findings">
           <span class="label">Labor consequences &mdash; key findings</span>
@@ -339,7 +381,7 @@
       <div class="synth-card">
         <h2>Synthesis &mdash; connecting the four stages</h2>
         <p><strong>Stage 01 &rarr; 02:</strong> National diffusion capacity is extraordinarily concentrated &mdash; the US expanded AI investment intensity <strong>11.3&times;</strong> since 2019 (0.11% &rarr; 1.24% of GDP) while most of the panel flatlined below 0.20% (Stanford AI Index 2025 &amp; 2026; IMF real GDP). That capacity concentration translates directly into <em>where</em> global flows go: 83% of 2025 private AI investment landed in the US ($285.9B of $344.7B).</p>
-        <p><strong>Stage 02 &rarr; 03:</strong> Within the global flow, capital concentrates in information-intensive industries (Technology, Financial Services, Professional Services) and knowledge-work functions (IT &amp; Software Engineering, Marketing, Product). The logistic model implies annual flow peaks in growth rate in <strong>2027</strong> and approaches a $1.2T ceiling; the Bass-velocity allocation model distributes the next five years of flow toward sectors combining high adoption momentum with large global output share &mdash; Financial Services, Technology, and Manufacturing.</p>
+        <p><strong>Stage 02 &rarr; 03:</strong> Within the global flow, capital concentrates in information-intensive industries (Technology, Financial Services, Professional Services) and knowledge-work functions (IT &amp; Software Engineering, Marketing, Product). The logistic model is presented as three scenarios &mdash; <strong>conservative, central, and aggressive</strong> &mdash; anchored at 2024 private investment ($170B) scaled by 3&times;, 5&times;, and 10&times;, giving saturation ceilings of $510B, $850B, and $1.7T. Under the <strong>central scenario</strong>, inflection occurs in 2025.9 and 2030 annual flow reaches $748B. The Bass-velocity allocation model distributes projected flow toward sectors combining high adoption momentum with large global output share &mdash; Financial Services, Technology, and Manufacturing.</p>
         <p><strong>Stage 03 &rarr; 04:</strong> The sector-level labor evidence is <em>not</em> a story of aggregate displacement &mdash; BLS projects the highest-adoption sectors to gain jobs through 2034 (BLS MLR 2026). But sector totals hide occupational composition: Brynjolfsson, Chandar &amp; Chen (2025) document a <strong>13% employment decline for AI-exposed workers aged 22&ndash;25</strong> even in sectors that are growing. This is the complementarity-vs-substitution split (Acemoglu &amp; Restrepo 2018, 2022; Autor 2024; Frey &amp; Osborne 2017) playing out at the occupational rather than sector level.</p>
         <p><strong>Research-question answer:</strong> Global AI investment shapes diffusion patterns through three mechanisms &mdash; (1) concentrating national capacity in a small set of economies, (2) channelling capital into information-intensive sectors where adoption is easiest, and (3) restructuring occupational demand within otherwise growing sectors. The labor consequences are <em>distributional</em>, not aggregate, which means standard sector-level employment indicators are inadequate for monitoring them.</p>
       </div>
@@ -347,7 +389,7 @@
       <div class="footer">
         <strong style="color:var(--text);font-style:normal;">Data sources.</strong> Private AI investment: Stanford AI Index 2025 (2019&ndash;2024) &amp; Stanford AI Index 2026 (2025). Real GDP: IMF World Economic Outlook &amp; World Bank (2025 projected from IMF growth rates). Sector adoption: McKinsey State of AI 2023&ndash;2025, IBM AI Adoption Index, NAM 2025 Manufacturing Survey, Oxford Insights, Stanford AI Index 2025. Business function adoption: McKinsey Global Survey on AI 2021&ndash;2025. US sector employment &amp; projections: BLS Monthly Labor Review 2026 (&ldquo;Industry and occupational employment projections 2024&ndash;34&rdquo;) &amp; BLS Current Employment Statistics 2023. Early-career displacement: Brynjolfsson, Chandar &amp; Chen (2025), &ldquo;Canaries in the Coal Mine: Generative AI and Early-Career Employment.&rdquo; Complementarity/substitution literature: Acemoglu &amp; Restrepo (2018, 2020, 2022), Autor (2024), Frey &amp; Osborne (2017).
         <br><br>
-        <strong style="color:var(--text);font-style:normal;">Limitations.</strong> 10-country panel; adoption figures from self-reported surveys; country-level adoption not directly measured; BLS labor data is US-only; logistic forecast uncertainty widens beyond 2027 and the $1.2T ceiling K is anchored externally to Gartner 2026 rather than identified purely from data. Pairing sector adoption with projected employment is descriptive, not causal.
+        <strong style="color:var(--text);font-style:normal;">Limitations.</strong> 10-country panel; adoption figures from self-reported surveys; country-level adoption not directly measured; BLS labor data is US-only; logistic forecast uncertainty widens beyond 2027. The saturation ceiling K is not identified from the seven-point series; instead we present three scenarios anchored at the 2024 observed private investment level ($170B, Stanford AI Index) scaled by 3&times;, 5&times;, and 10&times;. Fit quality (R&sup2;) differs only marginally across scenarios (0.925&ndash;0.951), confirming that n=7 data cannot distinguish between plausible ceilings. Pairing sector adoption with projected employment is descriptive, not causal.
       </div>
     </section>
 
@@ -406,11 +448,34 @@ const FUNCS = {
   'Strategy & Corp Fin.':[0.08,0.07,0.10,0.13,0.14,0.18]
 };
 
-// Logistic fit v4 (anchored): K=1200, r=0.447, t0=2027.09, R2=0.949
+// Logistic fit — three scenarios anchored at 2024 AI Index private investment ($170B) × {3, 5, 10}
+// Each scenario fixes K and fits r, t0 by nonlinear least squares on 2019–2025 observations.
+// 80% CI from residual bootstrap (1,000 resamples).
 const FIT_PROJ_Y = [2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030];
-const FIT_PROJ   = [31.4,48.4,74.0,111.8,166.1,241.0,338.5,456.7,587.9,720.4,841.6,943.2];
-const FIT_LO     = [19.1,34.0,59.4,98.6,155.4,229.1,308.4,380.4,431.9,463.8,481.2,491.7];
-const FIT_UP     = [41.3,61.1,89.6,130.3,187.1,264.0,366.6,493.8,635.4,771.4,893.2,990.3];
+const SCENARIOS = {
+  conservative: {
+    label: 'Conservative (3\u00d7 anchor)',
+    K: 510, r: 0.5925, t0: 2024.10, R2: 0.9251, RMSE: 28.43,
+    proj:  [23.7, 41.3, 70.1, 114.0, 174.7, 247.4, 321.3, 385.0, 432.4, 463.9, 483.5, 495.0],
+    lower: [15.3, 29.7, 56.3, 99.3, 161.4, 229.9, 294.1, 351.6, 399.7, 436.0, 461.8, 479.0],
+    upper: [39.7, 61.4, 93.5, 137.7, 197.4, 273.3, 352.7, 415.7, 457.9, 482.4, 495.8, 502.9]
+  },
+  central: {
+    label: 'Central (5\u00d7 anchor)',
+    K: 850, r: 0.4841, t0: 2025.89, R2: 0.9441, RMSE: 24.54,
+    proj:  [29.2, 46.4, 72.9, 112.2, 168.3, 243.1, 334.9, 436.4, 536.6, 625.0, 695.7, 747.8],
+    lower: [21.2, 36.2, 60.4, 99.1, 156.2, 228.5, 308.7, 395.0, 483.2, 565.4, 636.6, 695.2],
+    upper: [42.4, 62.3, 90.8, 130.9, 186.2, 262.6, 365.0, 477.3, 585.2, 674.3, 738.8, 781.8]
+  },
+  aggressive: {
+    label: 'Aggressive (10\u00d7 anchor)',
+    K: 1700, r: 0.4237, t0: 2028.27, R2: 0.9509, RMSE: 23.01,
+    proj:  [32.9, 49.7, 74.8, 111.6, 164.8, 239.5, 340.5, 470.4, 627.1, 801.8, 980.8, 1148.6],
+    lower: [24.9, 39.8, 63.0, 98.7, 152.4, 225.8, 314.3, 423.3, 550.6, 694.5, 847.7, 1002.8],
+    upper: [44.9, 64.1, 91.1, 128.2, 180.4, 256.5, 370.6, 521.0, 704.8, 906.0, 1100.5, 1269.3]
+  }
+};
+let currentScenario = 'central'; // default view
 
 const SECTOR_GDPW = {'Technology / Software':0.12,'Financial Services':0.14,'Professional Services':0.09,'Media & Telecom':0.05,'Retail & Consumer':0.10,'Manufacturing':0.15,'Healthcare & Pharma':0.08,'Energy & Materials':0.06,'Logistics':0.05,'Education':0.04,'Legal Services':0.02,'Government & Public':0.06,'Real Estate & Const.':0.08,'Environment / Climate':0.02,'Agriculture':0.04};
 const SECTOR_BASS = {'Technology / Software':{p:0.08,q:0.45},'Financial Services':{p:0.06,q:0.42},'Professional Services':{p:0.07,q:0.43},'Media & Telecom':{p:0.05,q:0.40},'Retail & Consumer':{p:0.04,q:0.38},'Manufacturing':{p:0.04,q:0.38},'Healthcare & Pharma':{p:0.04,q:0.38},'Energy & Materials':{p:0.04,q:0.36},'Logistics':{p:0.04,q:0.37},'Education':{p:0.03,q:0.35},'Legal Services':{p:0.03,q:0.37},'Government & Public':{p:0.03,q:0.32},'Real Estate & Const.':{p:0.03,q:0.30},'Environment / Climate':{p:0.03,q:0.33},'Agriculture':{p:0.02,q:0.28}};
@@ -532,23 +597,51 @@ function buildLegend(elId, chartId, labels, colors){
 }
 
 // ============ STAGE 1 ============
+// Dedicated perceptually-distinct palette for 10 countries
+// (avoids similar teals/greens that appeared in the general palette)
+const COUNTRY_COLORS = {
+  US: '#dc2626',  // red — keep US visually dominant as the leader
+  CN: '#2563eb',  // blue
+  GB: '#7c3aed',  // purple
+  IN: '#ea580c',  // orange
+  CA: '#0d9488',  // teal
+  DE: '#db2777',  // magenta
+  FR: '#ca8a04',  // gold
+  KR: '#16a34a',  // green
+  JP: '#0891b2',  // cyan
+  SG: '#be123c'   // crimson / rose
+};
+
 function r1(){
   const cs = Object.keys(SCALED);
-  const ds = cs.map((c, i) => ({
+  const ds = cs.map((c) => ({
     label: COUNTRY_NAME[c],
     data: SCALED[c].map(v => +(v * 100).toFixed(4)),
-    borderColor: PALETTE[i],
-    backgroundColor: PALETTE[i] + '22',
-    borderWidth: c === 'US' ? 2.8 : 1.5,
-    pointRadius: c === 'US' ? 4 : 2.2,
+    borderColor: COUNTRY_COLORS[c],
+    backgroundColor: COUNTRY_COLORS[c] + '22',
+    borderWidth: c === 'US' ? 2.8 : 1.8,
+    pointRadius: c === 'US' ? 4 : 2.5,
+    pointHoverRadius: 6,
+    pointBackgroundColor: COUNTRY_COLORS[c],
     tension: 0.25
   }));
   const o = baseOpts();
-  o.plugins.tooltip.callbacks = { label: ctx => ' ' + ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(3) + '% GDP' };
+  // Single-country hover: only show the nearest point's country, not all 10 at the same year
+  o.interaction = { mode: 'nearest', intersect: false, axis: 'xy' };
+  o.plugins.tooltip = {
+    ...o.plugins.tooltip,
+    mode: 'nearest',
+    intersect: false,
+    axis: 'xy',
+    callbacks: {
+      title: (items) => items.length ? items[0].label : '',
+      label: ctx => ' ' + ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(3) + '% GDP'
+    }
+  };
   o.scales.y.ticks.callback = v => v.toFixed(2) + '%';
   o.scales.y.title = { display: true, text: 'Investment / GDP (%)', color: themeVars().muted, font: { family: 'JetBrains Mono', size: 10.5 } };
   mk('ch-1', { type: 'line', data: { labels: YEARS, datasets: ds }, options: o });
-  buildLegend('lg-1', 'ch-1', cs.map(c => COUNTRY_NAME[c]), PALETTE);
+  buildLegend('lg-1', 'ch-1', cs.map(c => COUNTRY_NAME[c]), cs.map(c => COUNTRY_COLORS[c]));
 }
 
 // ============ STAGE 2 ============
@@ -614,16 +707,83 @@ function r2func(){
 // ============ STAGE 3 ============
 function r3(){
   const tv = themeVars();
+  const s = SCENARIOS[currentScenario];
   const obs = FIT_PROJ_Y.map((y) => y <= 2025 ? GLOBAL_INV.values[YEARS.indexOf(y)] : null);
-  const fit = FIT_PROJ_Y.map((y, i) => y <= 2025 ? FIT_PROJ[i] : null);
-  const proj = FIT_PROJ_Y.map((y, i) => y >= 2025 ? FIT_PROJ[i] : null);
-  const up = FIT_PROJ_Y.map((y, i) => y >= 2025 ? FIT_UP[i] : null);
-  const lo = FIT_PROJ_Y.map((y, i) => y >= 2025 ? FIT_LO[i] : null);
+  const fit = FIT_PROJ_Y.map((y, i) => y <= 2025 ? s.proj[i] : null);
+  const proj = FIT_PROJ_Y.map((y, i) => y >= 2025 ? s.proj[i] : null);
+  const up = FIT_PROJ_Y.map((y, i) => y >= 2025 ? s.upper[i] : null);
+  const lo = FIT_PROJ_Y.map((y, i) => y >= 2025 ? s.lower[i] : null);
+
+  // Inflection-marker plugin: draws a vertical dashed line at t0 with label
+  const inflectionPlugin = {
+    id: 'inflectionMarker',
+    afterDatasetsDraw(chart) {
+      const { ctx, chartArea: { top, bottom }, scales: { x, y } } = chart;
+      if (!x || !y) return;
+      // Interpolate the x-pixel for t0 (fractional year)
+      const t0 = s.t0;
+      const yearMin = FIT_PROJ_Y[0];
+      const yearMax = FIT_PROJ_Y[FIT_PROJ_Y.length - 1];
+      if (t0 < yearMin || t0 > yearMax) return;
+      const tickWidth = (x.right - x.left) / (FIT_PROJ_Y.length - 1);
+      const xPx = x.left + (t0 - yearMin) * tickWidth;
+      // K/2 value at inflection
+      const kHalf = s.K / 2;
+      const yPx = y.getPixelForValue(kHalf);
+
+      ctx.save();
+      // Vertical dashed line
+      ctx.strokeStyle = tv.proj;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(xPx, top);
+      ctx.lineTo(xPx, bottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Inflection dot at (t0, K/2)
+      ctx.fillStyle = tv.proj;
+      ctx.strokeStyle = tv.tBg;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(xPx, yPx, 5, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.stroke();
+
+      // Label box
+      const labelText = 't\u2080 = ' + s.t0.toFixed(1);
+      const kText = 'K/2 = $' + Math.round(kHalf) + 'B';
+      ctx.font = '10px "JetBrains Mono", monospace';
+      const padX = 6, padY = 4;
+      const tw1 = ctx.measureText(labelText).width;
+      const tw2 = ctx.measureText(kText).width;
+      const boxW = Math.max(tw1, tw2) + padX * 2;
+      const boxH = 28;
+      let boxX = xPx + 8;
+      // Flip label if it would overflow right edge
+      if (boxX + boxW > x.right) boxX = xPx - boxW - 8;
+      const boxY = top + 8;
+      ctx.fillStyle = tv.tBg;
+      ctx.strokeStyle = tv.proj;
+      ctx.lineWidth = 1;
+      ctx.fillRect(boxX, boxY, boxW, boxH);
+      ctx.strokeRect(boxX, boxY, boxW, boxH);
+      ctx.fillStyle = tv.proj;
+      ctx.textBaseline = 'top';
+      ctx.fillText(labelText, boxX + padX, boxY + padY);
+      ctx.fillStyle = tv.muted;
+      ctx.fillText(kText, boxX + padX, boxY + padY + 12);
+      ctx.restore();
+    }
+  };
+
   const o = baseOpts();
   o.plugins.tooltip.callbacks = { label: ctx => ' ' + ctx.dataset.label + ': ' + (ctx.parsed.y === null ? '—' : '$' + ctx.parsed.y.toFixed(1) + 'B') };
   o.plugins.tooltip.filter = i => !['CI_u', 'CI_l'].includes(i.dataset.label);
   o.scales.y.ticks.callback = v => '$' + v + 'B';
   o.scales.y.title = { display: true, text: 'Global investment (USD B)', color: tv.muted, font: { family: 'JetBrains Mono', size: 10.5 } };
+
   mk('ch-3', {
     type: 'line',
     data: {
@@ -636,7 +796,27 @@ function r3(){
         { label: 'Projection', data: proj, borderColor: tv.proj, borderWidth: 2.5, borderDash: [6, 4], pointRadius: 0, tension: 0.3, spanGaps: true }
       ]
     },
-    options: o
+    options: o,
+    plugins: [inflectionPlugin]
+  });
+}
+
+// Update the numeric readout when scenario changes
+function updateScenarioReadout(){
+  const s = SCENARIOS[currentScenario];
+  const els = {
+    K: '$' + (s.K >= 1000 ? (s.K/1000).toFixed(1).replace('.0','') + 'T' : s.K + 'B'),
+    r: s.r.toFixed(3),
+    t0: s.t0.toFixed(1),
+    r2: s.R2.toFixed(3),
+    '2030': '$' + Math.round(s.proj[s.proj.length-1]) + 'B'
+  };
+  Object.entries(els).forEach(([k, v]) => {
+    const el = document.getElementById('param-' + k);
+    if (!el) return;
+    el.classList.add('changing');
+    el.textContent = v;
+    setTimeout(() => el.classList.remove('changing'), 400);
   });
 }
 function r3alloc(){
@@ -671,32 +851,16 @@ function r4(){
     label: s,
     emp: SECTOR_EMP_M[s]
   }));
-  const n = points.length;
-  const mx = points.reduce((a, p) => a + p.x, 0) / n;
-  const my = points.reduce((a, p) => a + p.y, 0) / n;
-  let num = 0, den = 0;
-  for (const p of points) { num += (p.x - mx) * (p.y - my); den += (p.x - mx) ** 2; }
-  const slope = num / den;
-  const intercept = my - slope * mx;
-  const xMin = Math.min(...points.map(p => p.x));
-  const xMax = Math.max(...points.map(p => p.x));
-  const regLine = [{ x: xMin, y: slope * xMin + intercept }, { x: xMax, y: slope * xMax + intercept }];
-  let ssRes = 0, ssTot = 0;
-  for (const p of points) { const pred = slope * p.x + intercept; ssRes += (p.y - pred) ** 2; ssTot += (p.y - my) ** 2; }
-  const r2 = 1 - ssRes / ssTot;
 
-  // Each sector gets its own palette color (not grouped by growth band)
-  const datasets = [
-    ...points.map((p, i) => ({
-      label: p.label,
-      data: [{ x: p.x, y: p.y, r: p.r, s: p.label, emp: p.emp, growth: p.y }],
-      backgroundColor: PALETTE[i % PALETTE.length] + 'cc',
-      borderColor: PALETTE[i % PALETTE.length],
-      borderWidth: 1.5,
-      hoverBorderWidth: 2.5
-    })),
-    { label: 'OLS', data: regLine, borderColor: tv.hist, borderWidth: 1.5, borderDash: [5, 4], pointRadius: 0, showLine: true, type: 'line', fill: false, tension: 0 }
-  ];
+  // Each sector gets its own palette color
+  const datasets = points.map((p, i) => ({
+    label: p.label,
+    data: [{ x: p.x, y: p.y, r: p.r, s: p.label, emp: p.emp, growth: p.y }],
+    backgroundColor: PALETTE[i % PALETTE.length] + 'cc',
+    borderColor: PALETTE[i % PALETTE.length],
+    borderWidth: 1.5,
+    hoverBorderWidth: 2.5
+  }));
 
   const o = baseOpts();
   // Intersect mode: tooltip shows ONLY the bubble directly hovered
@@ -723,7 +887,7 @@ function r4(){
   };
   o.scales.x = { ...o.scales.x, type: 'linear', title: { display: true, text: '2025 sector AI adoption (%)', color: tv.muted, font: { family: 'JetBrains Mono', size: 10.5 } }, ticks: { ...o.scales.x.ticks, callback: v => v + '%' }, min: 35, max: 100 };
   o.scales.y = { ...o.scales.y, title: { display: true, text: 'BLS 2024–34 projected employment growth (%)', color: tv.muted, font: { family: 'JetBrains Mono', size: 10.5 } }, ticks: { ...o.scales.y.ticks, callback: v => (v >= 0 ? '+' : '') + v + '%' } };
-  // Enable legend so users can see color-sector mapping
+  // Legend shows color-to-sector mapping
   o.plugins.legend = {
     display: true,
     position: 'bottom',
@@ -733,17 +897,11 @@ function r4(){
       font: { family: 'JetBrains Mono', size: 10 },
       boxWidth: 10,
       boxHeight: 10,
-      padding: 8,
-      filter: (item) => item.text !== 'OLS'
+      padding: 8
     }
   };
 
   mk('ch-4', { type: 'bubble', data: { datasets }, options: o });
-
-  const sub = document.getElementById('ch-4-sub');
-  if (sub) {
-    sub.innerHTML = 'Y-axis: BLS 2024&ndash;34 sector employment growth projection (Monthly Labor Review 2026) &middot; X-axis: 2025 AI adoption (McKinsey / Stanford AI Index 2025) &middot; bubble sized by US sector employment (BLS CES 2023) &middot; OLS slope = ' + slope.toFixed(3) + ', R&sup2; = ' + r2.toFixed(3) + ', n = ' + n;
-  }
 }
 
 // ============ TABS ============
@@ -769,6 +927,21 @@ document.querySelectorAll('.nav-item').forEach(item => {
   });
 });
 
+// ============ SCENARIO BUTTONS (Stage 3) ============
+document.querySelectorAll('.scenario-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.scenario-btn').forEach(b => {
+      b.classList.remove('active');
+      b.setAttribute('aria-selected', 'false');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
+    currentScenario = btn.dataset.scenario;
+    updateScenarioReadout();
+    r3();
+  });
+});
+
 // ============ THEME ============
 document.getElementById('theme-btn').addEventListener('click', () => {
   THEME = THEME === 'light' ? 'dark' : 'light';
@@ -780,6 +953,7 @@ document.getElementById('theme-btn').addEventListener('click', () => {
 // ============ INITIAL ============
 function initAll(){
   r1(); r2global(); r2sector(); r2func(); r3(); r3alloc(); r4();
+  updateScenarioReadout();
 }
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initAll);
